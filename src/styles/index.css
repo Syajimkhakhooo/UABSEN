@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color: #10243e;
+    background:
+      radial-gradient(circle at top left, rgba(11, 135, 237, 0.08), transparent 28%),
+      linear-gradient(180deg, #f8fbff 0%, #f2f6fb 100%);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  * {
+    @apply border-slate-200;
+  }
+
+  body {
+    @apply min-h-screen bg-surface text-ink antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(11, 135, 237, 0.08), transparent 28%),
+      radial-gradient(circle at top right, rgba(0, 224, 255, 0.06), transparent 24%),
+      linear-gradient(180deg, #f8fbff 0%, #f2f6fb 100%);
+  }
+
+  input,
+  textarea {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-sky-100;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  button {
+    @apply transition;
+  }
+
+  table {
+    @apply w-full border-collapse;
+  }
+
+  th {
+    @apply whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500;
+  }
+
+  td {
+    @apply px-4 py-3 text-sm text-slate-700;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-[18px] border border-slate-200/80 bg-white backdrop-blur;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.03),
+      0 16px 36px -30px rgba(15, 23, 42, 0.22);
+  }
+
+  .section-title {
+    @apply text-base font-semibold tracking-[-0.02em] text-ink md:text-lg;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600;
+    box-shadow: 0 12px 28px -18px rgba(11, 135, 237, 0.55);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-sky-200 hover:text-primary;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-600;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+
+  .page-hero {
+    @apply relative overflow-hidden rounded-[22px] border border-slate-200/70 bg-white p-5 text-ink md:p-7;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.03),
+      0 20px 40px -34px rgba(15, 23, 42, 0.22);
+  }
+
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top left, rgba(11, 135, 237, 0.12), transparent 32%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(244, 248, 252, 0.86));
+    pointer-events: none;
+  }
+
+  .page-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .surface-subtle {
+    @apply rounded-[16px] border border-slate-200/80 bg-slate-50/80;
+  }
+
+  .field-note {
+    @apply rounded-xl border px-4 py-3 text-sm;
+  }
+
+  .custom-field {
+    @apply flex min-h-[46px] w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+
+  .custom-field:hover {
+    border-color: rgba(125, 148, 179, 0.48);
+  }
+
+  .custom-field-active {
+    @apply border-primary ring-4 ring-sky-100;
+  }
+
+  .custom-select-trigger {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.98));
+  }
+
+  .custom-popover {
+    @apply rounded-[20px] border border-slate-200/80 bg-white/95 backdrop-blur;
+    box-shadow:
+      0 24px 60px -36px rgba(15, 23, 42, 0.34),
+      0 8px 18px -14px rgba(15, 23, 42, 0.22);
+  }
+
+  .custom-option {
+    @apply flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition;
+  }
+
+  .custom-option-idle {
+    @apply text-slate-600 hover:bg-slate-50 hover:text-ink;
+  }
+
+  .custom-option-active {
+    background:
+      linear-gradient(135deg, rgba(11, 135, 237, 0.12), rgba(56, 189, 248, 0.08)),
+      #ffffff;
+    color: #0f2743;
+  }
+
+  .calendar-nav-button {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-500 transition hover:border-sky-200 hover:bg-sky-50 hover:text-primary;
+  }
+
+  .calendar-day {
+    @apply inline-flex h-10 items-center justify-center rounded-2xl text-sm font-medium transition;
+  }
+
+  .calendar-day:hover {
+    background: rgba(15, 118, 208, 0.08);
+  }
+
+  .calendar-day-today {
+    @apply border border-sky-200 bg-sky-50 text-primary;
+  }
+
+  .calendar-day-selected {
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.34), transparent 75%),
+      linear-gradient(135deg, #0b87ed, #1d9bf0);
+    box-shadow: 0 14px 24px -18px rgba(11, 135, 237, 0.7);
+    color: white;
+  }
+
+  .calendar-day-selected:hover {
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.34), transparent 75%),
+      linear-gradient(135deg, #0a7bda, #168bde);
+  }
+
+  .calendar-footer-button {
+    @apply text-sm font-semibold text-slate-500 transition hover:text-primary;
+  }
+
+  .sidebar-icon-link {
+    @apply mx-auto flex h-10 w-10 items-center justify-center rounded-[14px] bg-transparent;
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
+    transform: translate3d(0, 0, 0) scale(1);
+    will-change: transform;
+  }
+
+  .sidebar-icon-link:hover {
+    background: rgba(14, 116, 234, 0.08);
+    box-shadow: 0 10px 22px -16px rgba(14, 116, 234, 0.28);
+    transform: translate3d(0, -2px, 0) scale(1.04);
+  }
+
+  .sidebar-icon-link:active {
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+
+  .sidebar-icon-link-active {
+    @apply sidebar-icon-link bg-primary text-white shadow-soft;
+  }
+
+  .sidebar-icon-link-active:hover {
+    background: #1780ea;
+    box-shadow: 0 12px 24px -16px rgba(14, 116, 234, 0.34);
+    transform: translate3d(0, -2px, 0) scale(1.05);
+  }
+}
