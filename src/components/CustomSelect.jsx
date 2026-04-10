@@ -9,6 +9,7 @@ export default function CustomSelect({
   disabled = false,
   className = '',
   menuClassName = '',
+  menuPlacement = 'bottom',
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -72,7 +73,8 @@ export default function CustomSelect({
       {open && (
         <div
           className={[
-            'custom-popover absolute left-0 right-0 top-[calc(100%+0.55rem)] z-40 max-h-72 overflow-y-auto p-2',
+            'custom-popover absolute left-0 right-0 z-50 max-h-72 overflow-y-auto p-2',
+            menuPlacement === 'top' ? 'bottom-[calc(100%+0.55rem)]' : 'top-[calc(100%+0.55rem)]',
             menuClassName,
           ]
             .join(' ')

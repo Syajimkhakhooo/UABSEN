@@ -27,6 +27,7 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
 
   #root {
@@ -185,6 +186,138 @@
       linear-gradient(135deg, rgba(11, 135, 237, 0.12), rgba(56, 189, 248, 0.08)),
       #ffffff;
     color: #0f2743;
+  }
+
+  .landing-nav-link {
+    @apply relative inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-ink;
+  }
+
+  .landing-nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -0.45rem;
+    width: 100%;
+    height: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #0b87ed, #38bdf8);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .landing-nav-link:hover::after,
+  .landing-nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .landing-mobile-link {
+    @apply flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-primary;
+  }
+
+  .public-page {
+    @apply relative min-h-screen overflow-x-hidden;
+  }
+
+  .public-page-glow {
+    @apply pointer-events-none absolute;
+  }
+
+  .public-page-glow-primary {
+    inset: 0 0 auto 0;
+    height: 520px;
+    background:
+      radial-gradient(circle at top left, rgba(11, 135, 237, 0.16), transparent 35%),
+      radial-gradient(circle at top right, rgba(0, 224, 255, 0.10), transparent 26%);
+  }
+
+  .public-page-glow-left {
+    left: -8rem;
+    top: 7rem;
+    height: 16rem;
+    width: 16rem;
+    border-radius: 9999px;
+    background: rgba(186, 230, 253, 0.25);
+    filter: blur(48px);
+  }
+
+  .public-page-glow-right {
+    right: -6rem;
+    top: 10rem;
+    height: 18rem;
+    width: 18rem;
+    border-radius: 9999px;
+    background: rgba(165, 243, 252, 0.22);
+    filter: blur(56px);
+  }
+
+  .public-shell {
+    @apply relative z-10 mx-auto flex w-full max-w-6xl flex-col px-4 pb-12 pt-28 md:px-6 md:pb-16 md:pt-32;
+  }
+
+  .public-hero-grid {
+    @apply grid gap-8 lg:items-center lg:gap-10;
+  }
+
+  .public-section {
+    @apply py-6 md:py-10;
+  }
+
+  .public-badge {
+    @apply inline-flex items-center gap-2 rounded-full border bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em];
+    background-color: rgba(255, 255, 255, 0.92);
+  }
+
+  .public-badge-primary {
+    @apply inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary;
+    background-color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 16px 28px -22px rgba(11, 135, 237, 0.5);
+  }
+
+  .public-badge-warn {
+    @apply inline-flex items-center gap-2 rounded-full border border-amber-100 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700;
+    background-color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 16px 28px -22px rgba(251, 191, 36, 0.45);
+  }
+
+  .public-heading-xl {
+    @apply mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.05em] text-ink md:text-5xl;
+    line-height: 1.05;
+  }
+
+  .public-heading-lg {
+    @apply mt-3 text-3xl font-semibold tracking-[-0.04em] text-ink md:text-4xl;
+  }
+
+  .public-copy {
+    @apply mt-5 max-w-2xl text-base leading-8 text-slate-600 md:text-lg;
+  }
+
+  .public-copy-sm {
+    @apply mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base;
+  }
+
+  .public-action-row {
+    @apply mt-8 flex flex-col gap-3 sm:flex-row;
+  }
+
+  .public-chip-grid {
+    @apply mt-8 grid gap-3;
+  }
+
+  .public-panel {
+    @apply card border-white bg-white shadow-[0_30px_70px_-44px_rgba(15,23,42,0.36)];
+    border-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.92);
+  }
+
+  .public-panel-soft {
+    @apply surface-subtle bg-white backdrop-blur;
+    background-color: rgba(255, 255, 255, 0.82);
+  }
+
+  .public-split-grid {
+    @apply grid gap-6 lg:items-start;
   }
 
   .calendar-nav-button {

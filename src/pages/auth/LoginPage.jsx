@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { ArrowRight, LogIn, ShieldCheck, Sparkles } from 'lucide-react';
+import PublicPageFrame from '../../components/PublicPageFrame';
 import { useAuth } from '../../hooks/useAuth';
 import { activateLoginLockIfNeeded, getLoginLockState } from '../../lib/loginThrottle';
 
@@ -57,88 +58,98 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start px-4 py-12 md:justify-center md:p-10">
-      <div className="mb-8 flex w-full max-w-5xl items-center gap-3 lg:hidden">
-        <img src="/logo.png" alt="UABSEN" className="h-8 w-8 shrink-0 object-contain" />
-        <p className="text-sm font-bold tracking-wide text-primary/80">UABSEN</p>
-      </div>
-      <div className="flex w-full max-w-5xl flex-col-reverse gap-10 lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:gap-8">
-        <section className="page-hero">
-          <div className="hidden items-center gap-3 lg:flex">
-            <img src="/logo.png" alt="UABSEN" className="h-8 w-8 shrink-0 object-contain" />
-            <p className="text-sm font-bold tracking-wide text-primary/80">UABSEN</p>
-          </div>
-          <h1 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight tracking-[-0.04em] text-ink md:text-4xl">
-            Sistem Absensi Siswa untuk operasional LPK yang cepat dan rapi.
-          </h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
-            Login hanya tersedia untuk Admin dan siswa yang sudah dibuatkan akun oleh Admin. Tidak
-            ada pendaftaran publik pada fase ini.
-          </p>
-          <div className="mt-8 grid gap-3 md:grid-cols-3">
-            {[
-              'Validasi check-in/check-out berbasis lokasi',
-              'Pengajuan izin dan sakit dengan approval admin',
-              'Audit log, notifikasi, PDF, dan CSV siap pakai',
-            ].map((item) => (
-              <div key={item} className="surface-subtle p-4">
-                <p className="text-sm font-medium leading-6 text-slate-700">{item}</p>
+    <PublicPageFrame currentPath="/login" sectionBasePath="/" mainClassName="pb-14 md:pb-20">
+      <div className="public-hero-grid lg:grid-cols-[1.06fr_0.94fr]">
+          <section className="page-hero rounded-[28px]">
+            <div className="public-badge-primary">
+              <ShieldCheck size={14} />
+              Portal Masuk UABSEN
+            </div>
+
+            <h1 className="public-heading-xl">
+              Silahkan Login Untuk Melakukan Absensi 
+            </h1>
+
+            <p className="public-copy">
+              UABSEN membantu proses absensi harian tetap tertib dengan validasi lokasi, pengaturan jam, notifikasi,
+              dan riwayat yang mudah dipantau dalam satu sistem.
+            </p>
+
+            <div className="public-chip-grid md:grid-cols-3">
+              {[
+                'Validasi check-in/check-out berbasis lokasi',
+                'Pengajuan izin dan sakit dengan approval admin',
+                'Audit log, notifikasi, PDF, dan CSV siap pakai',
+              ].map((item) => (
+                <div key={item} className="public-panel-soft p-4">
+                  <p className="text-sm font-medium leading-6 text-slate-700">{item}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="public-action-row">
+              <a href="/#fitur" className="btn-secondary">
+                Lihat Fitur Utama
+              </a>
+              <a href="/#mulai" className="btn-secondary">
+                Pelajari Alurnya
+                <ArrowRight size={16} />
+              </a>
+            </div>
+          </section>
+
+          <section className="public-panel p-5 md:p-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              <Sparkles size={14} />
+              Masuk ke Aplikasi
+            </div>
+            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-ink md:text-3xl">Selamat Datang</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Gunakan akun yang sudah dibuatkan admin untuk melanjutkan aktivitas absensi Anda.
+            </p>
+
+            <form className="mt-7 grid gap-4" onSubmit={handleSubmit}>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-600">Email</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => {
+                    setForm((value) => ({ ...value, email: event.target.value }));
+                    setError('');
+                  }}
+                  placeholder="admin@example.com"
+                  required
+                />
               </div>
-            ))}
-          </div>
-        </section>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-600">Password</label>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(event) => {
+                    setForm((value) => ({ ...value, password: event.target.value }));
+                    setError('');
+                  }}
+                  placeholder="Masukkan password"
+                  required
+                />
+              </div>
 
-        <section className="card p-5 md:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-            Masuk ke Aplikasi
-          </p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-ink md:text-3xl">Selamat Datang</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Gunakan akun Yang Sudah disiapkan oleh admin.
-          </p>
+              {error && <p className="field-note border-rose-200 bg-rose-50 text-rose-600">{error}</p>}
+              {!error && lockState.locked && (
+                <p className="field-note border-amber-200 bg-amber-50 text-amber-700">
+                  Login untuk email ini dikunci sementara. Coba lagi dalam {lockState.remainingText}.
+                </p>
+              )}
 
-          <form className="mt-7 grid gap-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(event) => {
-                  setForm((value) => ({ ...value, email: event.target.value }));
-                  setError('');
-                }}
-                placeholder="admin@example.com"
-                required
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">Password</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(event) => {
-                  setForm((value) => ({ ...value, password: event.target.value }));
-                  setError('');
-                }}
-                placeholder="Masukkan password"
-                required
-              />
-            </div>
-
-            {error && <p className="field-note border-rose-200 bg-rose-50 text-rose-600">{error}</p>}
-            {!error && lockState.locked && (
-              <p className="field-note border-amber-200 bg-amber-50 text-amber-700">
-                Login untuk email ini dikunci sementara. Coba lagi dalam {lockState.remainingText}.
-              </p>
-            )}
-
-            <button type="submit" className="btn-primary mt-2 w-full" disabled={submitting || lockState.locked}>
-              <LogIn size={18} />
-              {submitting ? 'Memproses...' : lockState.locked ? 'Coba Lagi Nanti' : 'Masuk'}
-            </button>
-          </form>
-        </section>
+              <button type="submit" className="btn-primary mt-2 w-full" disabled={submitting || lockState.locked}>
+                <LogIn size={18} />
+                {submitting ? 'Memproses...' : lockState.locked ? 'Coba Lagi Nanti' : 'Masuk'}
+              </button>
+            </form>
+          </section>
       </div>
-    </div>
+    </PublicPageFrame>
   );
 }

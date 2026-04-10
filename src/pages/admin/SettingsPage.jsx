@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [ids, setIds] = useState({ settings_id: '', point_id: '' });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -41,11 +42,51 @@ export default function SettingsPage() {
     event.preventDefault();
     setSubmitting(true);
     setSuccess('');
+    setError('');
+
+    const latitude = Number(form.latitude);
+    const longitude = Number(form.longitude);
+    const radiusMeters = Number(form.radius_meters);
+    const gpsAccuracyThreshold = Number(form.gps_accuracy_threshold);
+
+    if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+      setError('Latitude tidak valid. Masukkan angka antara -90 sampai 90.');
+      setSubmitting(false);
+      return;
+    }
+
+    if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+      setError('Longitude tidak valid. Masukkan angka antara -180 sampai 180.');
+      setSubmitting(false);
+      return;
+    }
+
+    if (!Number.isInteger(radiusMeters) || radiusMeters <= 0) {
+      setError('Radius absensi harus berupa angka bulat lebih dari 0 meter.');
+      setSubmitting(false);
+      return;
+    }
+
+    if (!Number.isInteger(gpsAccuracyThreshold) || gpsAccuracyThreshold <= 0) {
+      setError('Batas akurasi GPS harus berupa angka bulat lebih dari 0 meter.');
+      setSubmitting(false);
+      return;
+    }
 
     try {
-      await saveAttendanceSettings({ ...form, ...ids });
-      await logAudit('settings_update', 'Admin memperbarui pengaturan absensi.', form);
+      const normalizedForm = {
+        ...form,
+        latitude,
+        longitude,
+        radius_meters: radiusMeters,
+        gps_accuracy_threshold: gpsAccuracyThreshold,
+      };
+
+      await saveAttendanceSettings({ ...normalizedForm, ...ids });
+      await logAudit('settings_update', 'Admin memperbarui pengaturan absensi.', normalizedForm);
       setSuccess('Pengaturan absensi berhasil disimpan.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Pengaturan absensi gagal disimpan.');
     } finally {
       setSubmitting(false);
     }
@@ -215,6 +256,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {error && <p className="field-note border-rose-200 bg-rose-50 text-rose-700">{error}</p>}
         {success && <p className="field-note border-emerald-200 bg-emerald-50 text-emerald-700">{success}</p>}
 
         <div className="flex justify-stretch sm:justify-end">

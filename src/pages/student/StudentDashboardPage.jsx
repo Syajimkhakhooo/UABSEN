@@ -15,6 +15,32 @@ export default function StudentDashboardPage() {
   const [submittingAction, setSubmittingAction] = useState('');
   const [message, setMessage] = useState('');
 
+  function getAttendanceBlockMessage(action) {
+    const todayAttendance = data?.todayAttendance;
+
+    if (!todayAttendance) {
+      return '';
+    }
+
+    if (['leave', 'sick'].includes(todayAttendance.attendance_status)) {
+      return 'Absensi hari ini sudah ditandai sebagai izin/sakit. Hubungi admin jika memang perlu diubah.';
+    }
+
+    if (action === 'check_in' && todayAttendance.check_in_at) {
+      return 'Check-in hari ini sudah tercatat.';
+    }
+
+    if (action === 'check_out' && !todayAttendance.check_in_at) {
+      return 'Check-in belum tercatat untuk hari ini.';
+    }
+
+    if (action === 'check_out' && todayAttendance.check_out_at) {
+      return 'Check-out hari ini sudah tercatat.';
+    }
+
+    return '';
+  }
+
   async function loadDashboard() {
     if (!profile?.student_id) return;
     const result = await getStudentDashboardData(profile.student_id);
@@ -30,6 +56,12 @@ export default function StudentDashboardPage() {
     setMessage('');
 
     try {
+      const blockedMessage = getAttendanceBlockMessage(action);
+      if (blockedMessage) {
+        setMessage(blockedMessage);
+        return;
+      }
+
       const position = await getCurrentPosition();
       await performAttendanceAction(
         action,

@@ -547,6 +547,7 @@ declare
   target_student public.students;
   target_point public.attendance_points;
   target_settings public.attendance_settings;
+  existing_attendance public.attendances;
   today_date date := current_date;
   local_now time := localtime;
   computed_distance double precision;
@@ -584,6 +585,17 @@ begin
     raise exception 'Pengaturan absensi belum lengkap.';
   end if;
 
+  select * into existing_attendance
+  from public.attendances
+  where student_id = target_student.id
+    and attendance_date = today_date
+  limit 1;
+
+  if existing_attendance.id is not null
+     and existing_attendance.attendance_status in ('leave', 'sick') then
+    raise exception 'Absensi hari ini sudah ditandai sebagai izin/sakit.';
+  end if;
+
   if target_settings.gps_accuracy_threshold is not null
      and input_accuracy is not null
      and input_accuracy > target_settings.gps_accuracy_threshold then
@@ -608,6 +620,10 @@ begin
   end if;
 
   if action_name = 'check_in' then
+    if existing_attendance.check_in_at is not null then
+      raise exception 'Check-in hari ini sudah tercatat.';
+    end if;
+
     if local_now < target_settings.check_in_start or local_now > target_settings.check_in_end then
       insert into public.audit_logs (action, description, metadata)
       values ('attendance_reject_time', 'Check-in ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
@@ -652,6 +668,10 @@ begin
 
     return affected_row;
   elsif action_name = 'check_out' then
+    if existing_attendance.check_out_at is not null then
+      raise exception 'Check-out hari ini sudah tercatat.';
+    end if;
+
     if local_now < target_settings.check_out_start or local_now > target_settings.check_out_end then
       insert into public.audit_logs (action, description, metadata)
       values ('attendance_reject_time', 'Check-out ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));

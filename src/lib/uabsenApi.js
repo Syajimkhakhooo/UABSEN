@@ -728,10 +728,14 @@ export async function getAttendanceSettings() {
   return { settings, attendancePoint };
 }
 
+function normalizeOptionalUuid(value) {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
 export async function saveAttendanceSettings(payload) {
   const settingsPromise = supabase.from('attendance_settings').upsert(
     {
-      id: payload.settings_id ?? undefined,
+      id: normalizeOptionalUuid(payload.settings_id),
       check_in_start: payload.check_in_start,
       present_cutoff: payload.present_cutoff,
       late_cutoff: payload.late_cutoff,
@@ -745,7 +749,7 @@ export async function saveAttendanceSettings(payload) {
 
   const pointPromise = supabase.from('attendance_points').upsert(
     {
-      id: payload.point_id ?? undefined,
+      id: normalizeOptionalUuid(payload.point_id),
       name: payload.location_name,
       latitude: payload.latitude,
       longitude: payload.longitude,

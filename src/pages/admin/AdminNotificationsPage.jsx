@@ -101,6 +101,7 @@ export default function AdminNotificationsPage() {
               }
               options={studentOptions}
               placeholder="Pilih siswa tujuan"
+              menuPlacement="top"
             />
           )}
           <button type="submit" className="btn-primary" disabled={submitting}>

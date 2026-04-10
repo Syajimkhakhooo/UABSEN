@@ -10,6 +10,7 @@ import { hasSupabaseEnv } from './lib/supabase';
 
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const PendingAccessPage = lazy(() => import('./pages/auth/PendingAccessPage'));
+const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const StudentManagementPage = lazy(() => import('./pages/admin/StudentManagementPage'));
 const AttendanceDataPage = lazy(() => import('./pages/admin/AttendanceDataPage'));
@@ -56,9 +57,10 @@ export default function App() {
   return (
     <Suspense fallback={<LoadingScreen label="Memuat halaman..." />}>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/pending-access" element={<PendingAccessPage />} />
-        <Route path="/" element={<RootRedirect />} />
+        <Route path="/app" element={<RootRedirect />} />
 
         <Route
           path="/admin"
