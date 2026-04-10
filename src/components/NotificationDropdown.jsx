@@ -20,7 +20,7 @@ export default function NotificationDropdown() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-primary"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-primary"
         aria-label="Buka notifikasi"
       >
         <div className="relative">
@@ -34,7 +34,7 @@ export default function NotificationDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-50 w-[min(320px,calc(100vw-1rem))] rounded-[16px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)]">
+        <div className="absolute right-0 top-11 z-50 w-[min(340px,calc(100vw-1rem))] rounded-[16px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)]">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-ink">Notifikasi</p>

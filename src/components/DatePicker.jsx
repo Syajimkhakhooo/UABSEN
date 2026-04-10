@@ -69,14 +69,14 @@ export default function DatePicker({
           .join(' ')
           .trim()}
       >
-        <span className={value ? 'text-slate-700' : 'text-slate-400'}>
+        <span className={['min-w-0 flex-1 truncate', value ? 'text-slate-700' : 'text-slate-400'].join(' ')}>
           {value ? formatDateDisplay(value) : placeholder}
         </span>
         <CalendarDays size={18} className="shrink-0 text-slate-400" />
       </button>
 
       {open && (
-        <div className="custom-popover absolute left-0 top-[calc(100%+0.55rem)] z-40 w-[19.5rem] p-3">
+        <div className="custom-popover absolute left-0 top-[calc(100%+0.55rem)] z-40 w-[min(19.5rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] p-3">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"

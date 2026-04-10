@@ -62,11 +62,11 @@ export default function AttendanceHistoryPage() {
       title="Riwayat Absensi"
       description="Siswa hanya dapat melihat dan mengunduh riwayat absensinya sendiri."
       actions={
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn-secondary" onClick={() => handleExport('csv')}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => handleExport('csv')}>
             Download CSV
           </button>
-          <button type="button" className="btn-primary" onClick={() => handleExport('pdf')}>
+          <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => handleExport('pdf')}>
             Download PDF
           </button>
         </div>
@@ -84,8 +84,8 @@ export default function AttendanceHistoryPage() {
       </div>
 
       {records.length ? (
-        <div className="overflow-x-auto">
-          <table>
+        <div className="table-shell">
+          <table className="responsive-table">
             <thead>
               <tr>
                 <th>Tanggal</th>
@@ -98,13 +98,13 @@ export default function AttendanceHistoryPage() {
             <tbody>
               {records.map((record) => (
                 <tr key={record.id} className="border-t border-slate-100">
-                  <td>{formatDate(record.attendance_date)}</td>
-                  <td>
+                  <td data-label="Tanggal">{formatDate(record.attendance_date)}</td>
+                  <td data-label="Status">
                     <StatusBadge status={record.attendance_status} />
                   </td>
-                  <td>{formatDateTime(record.check_in_at)}</td>
-                  <td>{formatDateTime(record.check_out_at)}</td>
-                  <td>{record.correction_note || '-'}</td>
+                  <td data-label="Check In">{formatDateTime(record.check_in_at)}</td>
+                  <td data-label="Check Out">{formatDateTime(record.check_out_at)}</td>
+                  <td data-label="Catatan">{record.correction_note || '-'}</td>
                 </tr>
               ))}
             </tbody>

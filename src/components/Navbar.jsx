@@ -23,7 +23,7 @@ export default function Navbar({ title, mobile = false }) {
   }, []);
 
   return (
-    <div className={mobile ? 'flex items-center justify-end gap-1' : 'flex flex-col gap-1.5 lg:flex-row lg:items-center lg:justify-between'}>
+    <div className={mobile ? 'flex items-center justify-end gap-1.5' : 'flex flex-col gap-1.5 lg:flex-row lg:items-center lg:justify-between'}>
       <div className="hidden lg:block">
         <h2 className="text-lg font-bold leading-tight text-ink">{title}</h2>
         <p className="text-xs text-slate-500">
@@ -31,13 +31,13 @@ export default function Navbar({ title, mobile = false }) {
         </p>
       </div>
 
-      <div className={mobile ? 'flex items-center gap-1' : 'flex items-center justify-end gap-1.5'}>
+      <div className={mobile ? 'flex items-center gap-1.5' : 'flex items-center justify-end gap-1.5'}>
         <NotificationDropdown />
         <div ref={profileRef} className="relative">
           <button
             type="button"
             onClick={() => setProfileOpen((value) => !value)}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-primary"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-primary"
             aria-label="Buka profil"
             title="Buka profil"
           >
@@ -65,7 +65,7 @@ export default function Navbar({ title, mobile = false }) {
         <button
           type="button"
           onClick={signOut}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:opacity-70"
           disabled={signingOut}
           aria-label={signingOut ? 'Sedang keluar' : 'Keluar'}
           title={signingOut ? 'Sedang keluar' : 'Keluar'}

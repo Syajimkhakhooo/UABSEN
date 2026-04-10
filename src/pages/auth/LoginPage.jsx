@@ -1,13 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { activateLoginLockIfNeeded, getLoginLockState } from '../../lib/loginThrottle';
 
 export default function LoginPage() {
   const { profile, signIn } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [lockState, setLockState] = useState(() => getLoginLockState(''));
+
+  useEffect(() => {
+    const syncLockState = () => setLockState(getLoginLockState(form.email));
+
+    syncLockState();
+
+    if (!form.email) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(syncLockState, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [form.email]);
 
   if (profile) {
     if (!profile.role) {
@@ -20,12 +35,22 @@ export default function LoginPage() {
   async function handleSubmit(event) {
     event.preventDefault();
     setError('');
+
+    const currentLockState = activateLoginLockIfNeeded(form.email);
+    setLockState(currentLockState);
+
+    if (currentLockState.locked) {
+      setError(currentLockState.message);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       await signIn(form.email, form.password);
     } catch (err) {
       setError(err.message ?? 'Login gagal. Periksa kembali email dan password.');
+      setLockState(getLoginLockState(form.email));
     } finally {
       setSubmitting(false);
     }
@@ -78,7 +103,10 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={form.email}
-                onChange={(event) => setForm((value) => ({ ...value, email: event.target.value }))}
+                onChange={(event) => {
+                  setForm((value) => ({ ...value, email: event.target.value }));
+                  setError('');
+                }}
                 placeholder="admin@example.com"
                 required
               />
@@ -88,19 +116,25 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={form.password}
-                onChange={(event) =>
-                  setForm((value) => ({ ...value, password: event.target.value }))
-                }
+                onChange={(event) => {
+                  setForm((value) => ({ ...value, password: event.target.value }));
+                  setError('');
+                }}
                 placeholder="Masukkan password"
                 required
               />
             </div>
 
             {error && <p className="field-note border-rose-200 bg-rose-50 text-rose-600">{error}</p>}
+            {!error && lockState.locked && (
+              <p className="field-note border-amber-200 bg-amber-50 text-amber-700">
+                Login untuk email ini dikunci sementara. Coba lagi dalam {lockState.remainingText}.
+              </p>
+            )}
 
-            <button type="submit" className="btn-primary mt-2 w-full" disabled={submitting}>
+            <button type="submit" className="btn-primary mt-2 w-full" disabled={submitting || lockState.locked}>
               <LogIn size={18} />
-              {submitting ? 'Memproses...' : 'Masuk'}
+              {submitting ? 'Memproses...' : lockState.locked ? 'Coba Lagi Nanti' : 'Masuk'}
             </button>
           </form>
         </section>

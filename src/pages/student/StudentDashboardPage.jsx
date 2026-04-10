@@ -4,6 +4,7 @@ import EmptyState from '../../components/EmptyState';
 import SectionCard from '../../components/SectionCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useAuth } from '../../hooks/useAuth';
+import { toUserMessage } from '../../lib/errorMessages';
 import { getStudentDashboardData, logAudit, performAttendanceAction } from '../../lib/uabsenApi';
 import { getCurrentPosition } from '../../utils/attendance';
 import { formatDate, formatDateTime } from '../../utils/format';
@@ -43,7 +44,7 @@ export default function StudentDashboardPage() {
       setMessage(action === 'check_in' ? 'Check-in berhasil diproses.' : 'Check-out berhasil diproses.');
       await loadDashboard();
     } catch (err) {
-      setMessage(err.message ?? 'Absensi gagal diproses.');
+      setMessage(toUserMessage(err, 'Absensi gagal diproses. Coba lagi sebentar.'));
     } finally {
       setSubmittingAction('');
     }
@@ -86,8 +87,10 @@ export default function StudentDashboardPage() {
         <h1 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-ink md:text-3xl">
           {profile?.students?.name}
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Nomor induk {profile?.students?.student_number} | Program {profile?.students?.training_program || '-'}
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Nomor induk {profile?.students?.student_number}
+          <span className="hidden sm:inline"> | </span>
+          <span className="block sm:inline">Program {profile?.students?.training_program || '-'}</span>
         </p>
       </section>
 
@@ -122,15 +125,15 @@ export default function StudentDashboardPage() {
 
             {data?.todayAttendance ? (
               <div className="mt-5 grid gap-3 rounded-[16px] border border-slate-200 bg-white p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-sm font-semibold text-slate-500">Status</span>
                   <StatusBadge status={data.todayAttendance.attendance_status} />
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-slate-500">Check In</span>
                   <span className="font-semibold text-ink">{formatDateTime(data.todayAttendance.check_in_at)}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-slate-500">Check Out</span>
                   <span className="font-semibold text-ink">{formatDateTime(data.todayAttendance.check_out_at)}</span>
                 </div>
@@ -151,8 +154,8 @@ export default function StudentDashboardPage() {
             <div className="grid gap-3">
               {data.recentHistory.map((item) => (
                 <div key={item.id} className="surface-subtle p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
                       <p className="text-sm font-bold text-ink">{formatDate(item.attendance_date)}</p>
                       <p className="mt-1 text-xs text-slate-500">
                         In {formatDateTime(item.check_in_at)} | Out {formatDateTime(item.check_out_at)}

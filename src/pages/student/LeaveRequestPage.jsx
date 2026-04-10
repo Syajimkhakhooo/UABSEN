@@ -6,6 +6,7 @@ import SectionCard from '../../components/SectionCard';
 import StatusBadge from '../../components/StatusBadge';
 import { LEAVE_TYPE_OPTIONS } from '../../lib/constants';
 import { useAuth } from '../../hooks/useAuth';
+import { toUserMessage } from '../../lib/errorMessages';
 import { listLeaveRequests, logAudit, notifyAdmins, submitLeaveRequest } from '../../lib/uabsenApi';
 import { formatDate, formatDateTime } from '../../utils/format';
 
@@ -97,7 +98,7 @@ export default function LeaveRequestPage() {
       ]);
       loadData().catch(() => {});
     } catch (err) {
-      setError(err.message ?? 'Pengajuan gagal dikirim.');
+      setError(toUserMessage(err, 'Pengajuan gagal dikirim. Coba lagi sebentar.'));
     } finally {
       setSubmitting(false);
     }
@@ -144,8 +145,8 @@ export default function LeaveRequestPage() {
           <div className="grid gap-3">
             {requests.map((request) => (
               <div key={request.id} className="surface-subtle p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
                     <p className="text-sm font-bold text-ink capitalize">
                       {request.request_type === 'leave' ? 'Izin' : 'Sakit'}
                     </p>

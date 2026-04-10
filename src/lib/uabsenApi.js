@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
 const AUTH_TIMEOUT_MS = 5000;
+const AUTH_MUTATION_TIMEOUT_MS = 15000;
 const CREATE_ACCOUNT_TIMEOUT_MS = 7000;
 const EDGE_FUNCTION_TIMEOUT_MS = 15000;
 
@@ -464,8 +465,8 @@ export async function createStudentAccount(payload) {
 export async function changeOwnPassword(nextPassword) {
   const { data, error } = await withTimeout(
     supabase.auth.updateUser({ password: nextPassword }),
-    AUTH_TIMEOUT_MS,
-    '[Timeout] Reset password tertahan.',
+    AUTH_MUTATION_TIMEOUT_MS,
+    '[Timeout] Proses ganti password terlalu lama. Coba tunggu beberapa detik lalu ulangi.',
   );
 
   if (error) {

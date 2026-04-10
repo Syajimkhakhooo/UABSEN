@@ -21,8 +21,7 @@ export default function PendingAccessPage() {
           </div>
           <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.04em] text-ink md:text-4xl">Akses akun belum siap dipakai.</h1>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            Akun Authentication Anda sudah terdeteksi, tetapi metadata role atau tautan ke data siswa
-            belum lengkap.
+            Akun Anda sudah berhasil masuk, tetapi aksesnya masih perlu dilengkapi agar semua fitur bisa digunakan.
           </p>
         </section>
 
@@ -34,17 +33,17 @@ export default function PendingAccessPage() {
           <div className="mt-6 grid gap-3">
             {needsRole && (
               <div className="field-note border-amber-200 bg-amber-50 text-amber-800">
-                `public.profiles.role` pada akun ini belum diisi. Isi menjadi `admin` atau `student`.
+                Peran akun ini belum dipilih. Minta admin menentukan akses akun sebagai Admin atau Siswa.
               </div>
             )}
             {needsStudentLink && (
               <div className="field-note border-sky-200 bg-sky-50 text-sky-800">
-                Akun sudah bertipe `student`, tetapi data siswa belum ditautkan lewat `profiles.student_id`.
+                Akun siswa ini belum dihubungkan ke data siswa. Minta admin menyambungkan profil akun dengan data siswa.
               </div>
             )}
             {!needsRole && !needsStudentLink && (
               <div className="field-note border-slate-200 bg-slate-50 text-slate-700">
-                Akses masih dibatasi. Pastikan data siswa aktif jika akun ini dipakai sebagai student.
+                Akses akun masih dibatasi. Silakan hubungi admin untuk memastikan data akun sudah aktif dan lengkap.
               </div>
             )}
           </div>

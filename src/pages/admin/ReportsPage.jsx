@@ -73,11 +73,11 @@ export default function ReportsPage() {
         />
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className="btn-secondary" onClick={() => handleExport('csv')}>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => handleExport('csv')}>
           Export CSV
         </button>
-        <button type="button" className="btn-primary" onClick={() => handleExport('pdf')}>
+        <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => handleExport('pdf')}>
           Export PDF
         </button>
       </div>

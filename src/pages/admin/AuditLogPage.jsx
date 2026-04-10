@@ -46,8 +46,8 @@ export default function AuditLogPage() {
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table>
+      <div className="table-shell">
+        <table className="responsive-table">
           <thead>
             <tr>
               <th>Waktu</th>
@@ -59,10 +59,10 @@ export default function AuditLogPage() {
           <tbody>
             {logs.map((log) => (
               <tr key={log.id} className="border-t border-slate-100">
-                <td>{formatDateTime(log.created_at)}</td>
-                <td className="font-semibold text-ink">{log.action}</td>
-                <td>{log.description}</td>
-                <td>
+                <td data-label="Waktu">{formatDateTime(log.created_at)}</td>
+                <td data-label="Aksi" className="font-semibold text-ink">{log.action}</td>
+                <td data-label="Deskripsi">{log.description}</td>
+                <td data-label="Metadata">
                   <pre className="max-w-sm whitespace-pre-wrap text-xs text-slate-500">
                     {JSON.stringify(log.metadata ?? {}, null, 2)}
                   </pre>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import EmptyState from '../../components/EmptyState';
 import SectionCard from '../../components/SectionCard';
 import { useAuth } from '../../hooks/useAuth';
+import { toUserMessage } from '../../lib/errorMessages';
 import { changeOwnPassword } from '../../lib/uabsenApi';
 
 export default function ProfilePage() {
@@ -58,7 +59,7 @@ export default function ProfilePage() {
       setPasswordOpen(false);
       setSuccess('Password akun berhasil diperbarui. Gunakan password baru saat login berikutnya.');
     } catch (err) {
-      setError(err.message ?? 'Gagal memperbarui password.');
+      setError(toUserMessage(err, 'Gagal memperbarui password. Coba lagi sebentar.'));
     } finally {
       setSubmitting(false);
     }
@@ -104,7 +105,7 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          <label className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600">
+          <label className="inline-flex items-center justify-between gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 sm:justify-start">
             <span>Reset Password</span>
             <button
               type="button"
@@ -163,8 +164,8 @@ export default function ProfilePage() {
                 required
               />
             </div>
-            <div className="flex justify-end">
-              <button type="submit" className="btn-primary" disabled={submitting}>
+            <div className="flex justify-stretch sm:justify-end">
+              <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
                 {submitting ? 'Menyimpan...' : 'Simpan Password Baru'}
               </button>
             </div>

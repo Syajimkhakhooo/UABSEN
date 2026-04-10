@@ -103,11 +103,11 @@ export default function AttendanceDataPage() {
         title="Data Absensi"
         description="Filter per tanggal, rentang waktu, siswa, dan status. Koreksi manual selalu dicatat di audit log."
         actions={
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn-secondary" onClick={() => exportAttendanceCsv(records)}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => exportAttendanceCsv(records)}>
               Export CSV
             </button>
-            <button type="button" className="btn-primary" onClick={() => exportAttendancePdf(records)}>
+            <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => exportAttendancePdf(records)}>
               Export PDF
             </button>
           </div>
@@ -136,8 +136,8 @@ export default function AttendanceDataPage() {
           />
         </div>
 
-        <div className="overflow-x-auto">
-          <table>
+        <div className="table-shell">
+          <table className="responsive-table">
             <thead>
               <tr>
                 <th>Siswa</th>
@@ -151,17 +151,17 @@ export default function AttendanceDataPage() {
             <tbody>
               {records.map((record) => (
                 <tr key={record.id} className="border-t border-slate-100">
-                  <td>
+                  <td data-label="Siswa">
                     <div className="font-semibold text-ink">{record.students?.name}</div>
                     <div className="text-xs text-slate-500">{record.students?.student_number}</div>
                   </td>
-                  <td>{formatDate(record.attendance_date)}</td>
-                  <td>
+                  <td data-label="Tanggal">{formatDate(record.attendance_date)}</td>
+                  <td data-label="Status">
                     <StatusBadge status={record.attendance_status} />
                   </td>
-                  <td>{formatDateTime(record.check_in_at)}</td>
-                  <td>{formatDateTime(record.check_out_at)}</td>
-                  <td>
+                  <td data-label="Check In">{formatDateTime(record.check_in_at)}</td>
+                  <td data-label="Check Out">{formatDateTime(record.check_out_at)}</td>
+                  <td data-label="Aksi">
                     <button
                       type="button"
                       className="btn-secondary !px-3 !py-2"
@@ -219,11 +219,11 @@ export default function AttendanceDataPage() {
             }
             required
           />
-          <div className="flex justify-end gap-3">
-            <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => setModalOpen(false)}>
               Batal
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
               {submitting ? 'Menyimpan...' : 'Simpan Koreksi'}
             </button>
           </div>

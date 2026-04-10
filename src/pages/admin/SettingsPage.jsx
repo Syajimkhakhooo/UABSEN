@@ -217,8 +217,8 @@ export default function SettingsPage() {
 
         {success && <p className="field-note border-emerald-200 bg-emerald-50 text-emerald-700">{success}</p>}
 
-        <div className="flex justify-end">
-          <button type="submit" className="btn-primary" disabled={submitting}>
+        <div className="flex justify-stretch sm:justify-end">
+          <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
             {submitting ? 'Menyimpan...' : 'Simpan Pengaturan'}
           </button>
         </div>

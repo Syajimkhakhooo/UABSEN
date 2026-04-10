@@ -3,6 +3,7 @@ import EmptyState from '../../components/EmptyState';
 import SectionCard from '../../components/SectionCard';
 import StatCard from '../../components/StatCard';
 import StatusBadge from '../../components/StatusBadge';
+import { toUserMessage } from '../../lib/errorMessages';
 import { getAdminDashboardData } from '../../lib/uabsenApi';
 import { formatDate, formatDateTime } from '../../utils/format';
 
@@ -17,7 +18,7 @@ export default function AdminDashboardPage() {
         const result = await getAdminDashboardData();
         setData(result);
       } catch (err) {
-        setError(err.message);
+        setError(toUserMessage(err, 'Dashboard admin belum bisa dimuat. Coba lagi sebentar.'));
       } finally {
         setLoading(false);
       }
@@ -61,8 +62,8 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <SectionCard title="Absensi Hari Ini" description={`Tanggal ${formatDate(new Date())}`}>
           {data.todayAttendance.length ? (
-            <div className="overflow-x-auto">
-              <table>
+            <div className="table-shell">
+              <table className="responsive-table">
                 <thead>
                   <tr>
                     <th>Siswa</th>
@@ -73,14 +74,14 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {data.todayAttendance.map((item) => (
                     <tr key={item.id} className="border-t border-slate-100">
-                      <td>
+                      <td data-label="Siswa">
                         <div className="font-semibold text-ink">{item.students?.name}</div>
                         <div className="text-xs text-slate-500">{item.students?.student_number}</div>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <StatusBadge status={item.attendance_status} />
                       </td>
-                      <td>{formatDate(item.attendance_date)}</td>
+                      <td data-label="Tanggal">{formatDate(item.attendance_date)}</td>
                     </tr>
                   ))}
                 </tbody>

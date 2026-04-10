@@ -54,8 +54,8 @@ export default function LeaveRequestsPage() {
       title="Pengajuan Izin & Sakit"
       description="Admin meninjau, menyetujui, atau menolak permohonan siswa sesuai dokumen pendukung operasional."
     >
-      <div className="overflow-x-auto">
-        <table>
+      <div className="table-shell">
+        <table className="responsive-table">
           <thead>
             <tr>
               <th>Siswa</th>
@@ -70,21 +70,21 @@ export default function LeaveRequestsPage() {
           <tbody>
             {requests.map((request) => (
               <tr key={request.id} className="border-t border-slate-100">
-                <td>
+                <td data-label="Siswa">
                   <div className="font-semibold text-ink">{request.students?.name}</div>
                   <div className="text-xs text-slate-500">{request.students?.student_number}</div>
                 </td>
-                <td className="capitalize">{request.request_type === 'leave' ? 'Izin' : 'Sakit'}</td>
-                <td>
+                <td data-label="Jenis" className="capitalize">{request.request_type === 'leave' ? 'Izin' : 'Sakit'}</td>
+                <td data-label="Rentang">
                   {formatDate(request.start_date)}
                   <div className="text-xs text-slate-500">s.d. {formatDate(request.end_date)}</div>
                 </td>
-                <td className="max-w-xs whitespace-normal">{request.reason}</td>
-                <td>
+                <td data-label="Alasan" className="max-w-xs whitespace-normal">{request.reason}</td>
+                <td data-label="Status">
                   <StatusBadge status={request.review_status} type="request" />
                 </td>
-                <td>{formatDateTime(request.created_at)}</td>
-                <td>
+                <td data-label="Dibuat">{formatDateTime(request.created_at)}</td>
+                <td data-label="Aksi">
                   <button
                     type="button"
                     className="btn-secondary !px-3 !py-2"
@@ -124,11 +124,11 @@ export default function LeaveRequestsPage() {
             value={review.review_note}
             onChange={(event) => setReview((value) => ({ ...value, review_note: event.target.value }))}
           />
-          <div className="flex justify-end gap-3">
-            <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => setModalOpen(false)}>
               Batal
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
               {submitting ? 'Memproses...' : 'Simpan Keputusan'}
             </button>
           </div>

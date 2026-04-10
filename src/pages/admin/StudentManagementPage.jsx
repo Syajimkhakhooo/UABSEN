@@ -5,6 +5,7 @@ import EmptyState from '../../components/EmptyState';
 import Modal from '../../components/Modal';
 import SectionCard from '../../components/SectionCard';
 import StatusBadge from '../../components/StatusBadge';
+import { toUserMessage } from '../../lib/errorMessages';
 import {
   createStudentAccount,
   deleteStudent,
@@ -82,7 +83,7 @@ export default function StudentManagementPage() {
       setStudentModalOpen(false);
       await loadStudents();
     } catch (err) {
-      setError(err.message);
+      setError(toUserMessage(err, 'Data siswa belum bisa disimpan. Coba lagi sebentar.'));
     } finally {
       setSubmitting(false);
     }
@@ -106,7 +107,7 @@ export default function StudentManagementPage() {
       setSuccess('Akun login siswa berhasil dibuat.');
       await loadStudents();
     } catch (err) {
-      setError(err.message);
+      setError(toUserMessage(err, 'Akun login siswa belum bisa dibuat. Coba lagi sebentar.'));
     } finally {
       setSubmitting(false);
     }
@@ -123,7 +124,7 @@ export default function StudentManagementPage() {
       setDeleteDialog({ open: false, studentId: '', studentName: '' });
       setSuccess('Data siswa berhasil dihapus.');
     } catch (err) {
-      setError(err.message);
+      setError(toUserMessage(err, 'Data siswa belum bisa dihapus. Coba lagi sebentar.'));
     } finally {
       setSubmitting(false);
     }
@@ -159,7 +160,7 @@ export default function StudentManagementPage() {
       setResetPasswordModalOpen(false);
       setSuccess(result?.message ?? 'Password siswa berhasil direset.');
     } catch (err) {
-      setError(err.message);
+      setError(toUserMessage(err, 'Password siswa belum bisa direset. Coba lagi sebentar.'));
     } finally {
       setSubmitting(false);
     }
@@ -183,10 +184,10 @@ export default function StudentManagementPage() {
         title="Manajemen Data Siswa"
         description="Admin dapat membuat master data siswa tanpa akun login, lalu menautkannya ke profile login kapan saja."
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto"
               onClick={() => {
                 setStudentForm(initialStudentForm);
                 setStudentModalOpen(true);
@@ -214,8 +215,8 @@ export default function StudentManagementPage() {
         {success && <p className="field-note mb-4 border-emerald-200 bg-emerald-50 text-emerald-700">{success}</p>}
 
         {students.length ? (
-          <div className="overflow-x-auto">
-            <table>
+          <div className="table-shell">
+            <table className="responsive-table">
               <thead>
                 <tr>
                   <th>Siswa</th>
@@ -230,12 +231,12 @@ export default function StudentManagementPage() {
                   const hasProfile = Boolean(student.auth_user_id);
                   return (
                     <tr key={student.id} className="border-t border-slate-100">
-                      <td>
+                      <td data-label="Siswa">
                         <div className="font-semibold text-ink">{student.name}</div>
                         <div className="text-xs text-slate-500">{student.student_number}</div>
                       </td>
-                      <td>{student.training_program || '-'}</td>
-                      <td>
+                      <td data-label="Program">{student.training_program || '-'}</td>
+                      <td data-label="Status">
                         <span
                           className={`badge ${
                             student.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
@@ -244,19 +245,18 @@ export default function StudentManagementPage() {
                           {student.active ? 'Aktif' : 'Nonaktif'}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Login">
                         {hasProfile ? (
                           <StatusBadge status="approved" type="request" />
                         ) : (
                           <span className="badge bg-amber-100 text-amber-700">Belum dibuat</span>
                         )}
                       </td>
-                      <td>
-                        <div className="flex flex-wrap gap-2">
-                          <div className="flex items-center gap-2">
+                      <td data-label="Aksi">
+                        <div className="table-action-stack">
                           <button
                             type="button"
-                            className="text-xs font-semibold text-slate-500 hover:text-primary"
+                            className="table-text-button table-text-button-primary"
                             onClick={() => {
                               setError('');
                               setSuccess('');
@@ -267,31 +267,27 @@ export default function StudentManagementPage() {
                             Edit Data
                           </button>
                           {hasProfile && (
-                            <>
-                              <span className="text-slate-300">|</span>
-                              <button
-                                type="button"
-                                className="text-xs font-semibold text-slate-500 hover:text-primary"
-                                onClick={() => {
-                                  setError('');
-                                  setSuccess('');
-                                  setResetPasswordForm({
-                                    student_id: student.id,
-                                    student_name: student.name,
-                                    password: '',
-                                    confirmPassword: '',
-                                  });
-                                  setResetPasswordModalOpen(true);
-                                }}
-                              >
-                                Reset Password
-                              </button>
-                            </>
+                            <button
+                              type="button"
+                              className="table-text-button table-text-button-primary"
+                              onClick={() => {
+                                setError('');
+                                setSuccess('');
+                                setResetPasswordForm({
+                                  student_id: student.id,
+                                  student_name: student.name,
+                                  password: '',
+                                  confirmPassword: '',
+                                });
+                                setResetPasswordModalOpen(true);
+                              }}
+                            >
+                              Reset Password
+                            </button>
                           )}
-                          <span className="text-slate-300">|</span>
                           <button
                             type="button"
-                            className="text-xs font-semibold text-rose-500 hover:text-rose-600"
+                            className="table-text-button table-text-button-danger"
                             onClick={() =>
                               setDeleteDialog({
                                 open: true,
@@ -302,7 +298,6 @@ export default function StudentManagementPage() {
                           >
                             Hapus
                           </button>
-                        </div>
                           {!hasProfile && (
                             <button
                               type="button"
@@ -402,11 +397,11 @@ export default function StudentManagementPage() {
             />
             Siswa aktif
           </label>
-          <div className="flex justify-end gap-3">
-            <button type="button" className="btn-secondary" onClick={() => setStudentModalOpen(false)}>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => setStudentModalOpen(false)}>
               Batal
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
               {submitting ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>
@@ -440,11 +435,11 @@ export default function StudentManagementPage() {
               required
             />
           </div>
-          <div className="flex justify-end gap-3">
-            <button type="button" className="btn-secondary" onClick={() => setAccountModalOpen(false)}>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => setAccountModalOpen(false)}>
               Batal
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
               {submitting ? 'Membuat akun...' : 'Buat & Tautkan'}
             </button>
           </div>
@@ -490,10 +485,10 @@ export default function StudentManagementPage() {
           <p className="field-note border-amber-200 bg-amber-50 text-amber-800">
             Password lama siswa akan langsung diganti. Beri tahu siswa untuk login memakai password baru ini.
           </p>
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto"
               onClick={() => {
                 setResetPasswordModalOpen(false);
                 setResetPasswordForm(initialResetPasswordForm);
@@ -501,7 +496,7 @@ export default function StudentManagementPage() {
             >
               Batal
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary w-full sm:w-auto" disabled={submitting}>
               <KeyRound size={16} />
               {submitting ? 'Menyimpan...' : 'Reset Password'}
             </button>

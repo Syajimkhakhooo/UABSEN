@@ -18,16 +18,31 @@
   }
 
   body {
-    @apply min-h-screen bg-surface text-ink antialiased;
+    @apply min-h-screen overflow-x-hidden bg-surface text-ink antialiased;
     background-image:
       radial-gradient(circle at top left, rgba(11, 135, 237, 0.08), transparent 28%),
       radial-gradient(circle at top right, rgba(0, 224, 255, 0.06), transparent 24%),
       linear-gradient(180deg, #f8fbff 0%, #f2f6fb 100%);
   }
 
-  input,
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  select,
   textarea {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-sky-100;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-sky-100 md:text-sm;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   }
 
@@ -106,6 +121,28 @@
 
   .field-note {
     @apply rounded-xl border px-4 py-3 text-sm;
+  }
+
+  .table-shell {
+    @apply overflow-x-auto rounded-[18px];
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .table-action-stack {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .table-text-button {
+    @apply text-xs font-semibold transition;
+  }
+
+  .table-text-button-primary {
+    @apply text-slate-500 hover:text-primary;
+  }
+
+  .table-text-button-danger {
+    @apply text-rose-500 hover:text-rose-600;
   }
 
   .custom-field {
@@ -213,5 +250,87 @@
     background: #1780ea;
     box-shadow: 0 12px 24px -16px rgba(14, 116, 234, 0.34);
     transform: translate3d(0, -2px, 0) scale(1.05);
+  }
+}
+
+@media (max-width: 767px) {
+  .page-hero,
+  .card {
+    border-radius: 18px;
+  }
+
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table,
+  .responsive-table tbody,
+  .responsive-table tr,
+  .responsive-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .responsive-table tbody {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .responsive-table tr {
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.96));
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.03),
+      0 12px 28px -24px rgba(15, 23, 42, 0.18);
+    padding: 0.85rem 0.95rem;
+  }
+
+  .responsive-table td {
+    border: 0;
+    padding: 0.48rem 0;
+    white-space: normal;
+  }
+
+  .responsive-table td + td {
+    border-top: 1px dashed rgba(226, 232, 240, 0.9);
+  }
+
+  .responsive-table td[data-label] {
+    display: grid;
+    grid-template-columns: minmax(88px, 110px) minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: start;
+  }
+
+  .responsive-table td[data-label]::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(100 116 139);
+    line-height: 1.45;
+  }
+
+  .responsive-table td[data-label] > * {
+    min-width: 0;
+  }
+
+  .responsive-table td[data-label='Aksi'] .table-action-stack {
+    justify-content: flex-start;
+  }
+
+  .responsive-table td[data-label='Aksi'] .table-text-button,
+  .responsive-table td[data-label='Aksi'] .btn-primary,
+  .responsive-table td[data-label='Aksi'] .btn-secondary,
+  .responsive-table td[data-label='Aksi'] .btn-danger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-action-stack {
+    width: 100%;
   }
 }

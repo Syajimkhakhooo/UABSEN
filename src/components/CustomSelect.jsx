@@ -53,14 +53,14 @@ export default function CustomSelect({
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
         className={[
-          'custom-field custom-select-trigger',
+          'custom-field custom-select-trigger text-left',
           open ? 'custom-field-active' : '',
           disabled ? 'cursor-not-allowed opacity-60' : '',
         ]
           .join(' ')
           .trim()}
       >
-        <span className={selectedOption ? 'text-slate-700' : 'text-slate-400'}>
+        <span className={['min-w-0 flex-1 truncate', selectedOption ? 'text-slate-700' : 'text-slate-400'].join(' ')}>
           {selectedOption?.label ?? placeholder}
         </span>
         <ChevronDown

@@ -1,4 +1,10 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  activateLoginLockIfNeeded,
+  clearFailedLoginAttempts,
+  getLoginLockState,
+  registerFailedLoginAttempt,
+} from '../lib/loginThrottle';
 import { hasSupabaseEnv, supabase } from '../lib/supabase';
 import { fetchProfile, logAudit } from '../lib/uabsenApi';
 
@@ -7,6 +13,44 @@ export const AuthContext = createContext(null);
 const SIGN_OUT_TIMEOUT_MS = 5000;
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 5000;
 const PROFILE_LOAD_TIMEOUT_MS = 7000;
+
+function normalizeLoginError(error) {
+  const message = (error?.message ?? '').toLowerCase();
+
+  if (
+    message.includes('invalid login credentials') ||
+    message.includes('invalid_credentials') ||
+    message.includes('email not confirmed') ||
+    message.includes('invalid email or password')
+  ) {
+    return new Error('Email atau kata sandi salah. Cek kembali lalu coba login lagi.');
+  }
+
+  if (message.includes('too many requests')) {
+    return new Error('Terlalu banyak percobaan login. Tunggu sebentar lalu coba lagi.');
+  }
+
+  if (
+    message.includes('failed to fetch') ||
+    message.includes('network') ||
+    message.includes('fetch')
+  ) {
+    return new Error('Koneksi ke server bermasalah. Periksa internet Anda lalu coba lagi.');
+  }
+
+  return new Error('Login gagal. Periksa kembali email dan kata sandi Anda.');
+}
+
+function isCredentialLoginError(error) {
+  const message = (error?.message ?? '').toLowerCase();
+
+  return (
+    message.includes('invalid login credentials') ||
+    message.includes('invalid_credentials') ||
+    message.includes('invalid email or password') ||
+    message.includes('email not confirmed')
+  );
+}
 
 async function withTimeout(promise, timeoutMs, fallbackMessage) {
   let timeoutId;
@@ -160,8 +204,25 @@ export function AuthProvider({ children }) {
 
       signIn: async (email, password) => {
         if (!supabase) throw new Error('Konfigurasi Supabase belum diisi pada file .env.');
+
+        const lockState = activateLoginLockIfNeeded(email);
+        if (lockState.locked) {
+          throw new Error(lockState.message);
+        }
+
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (isCredentialLoginError(error)) {
+            const nextLockState = registerFailedLoginAttempt(email);
+            if (nextLockState.locked) {
+              throw new Error(nextLockState.message);
+            }
+          }
+
+          throw normalizeLoginError(error);
+        }
+
+        clearFailedLoginAttempts(email);
       },
 
       signOut: async () => {

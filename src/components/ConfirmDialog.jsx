@@ -43,13 +43,18 @@ export default function ConfirmDialog({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <button type="button" className="btn-secondary" onClick={onClose} disabled={confirming}>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            className="btn-secondary w-full sm:w-auto"
+            onClick={onClose}
+            disabled={confirming}
+          >
             {cancelText}
           </button>
           <button
             type="button"
-            className={tone === 'danger' ? 'btn-danger' : 'btn-primary'}
+            className={[tone === 'danger' ? 'btn-danger' : 'btn-primary', 'w-full sm:w-auto'].join(' ')}
             onClick={onConfirm}
             disabled={confirming}
           >

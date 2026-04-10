@@ -141,7 +141,7 @@ export default function AdminNotificationsPage() {
                           : 'Notifikasi'}
                   </span>
                 </div>
-                <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs text-slate-400">{formatDateTime(notification.created_at)}</p>
                   {!notification.is_read && (
                     <span className="inline-flex h-2 w-2 rounded-full bg-primary" title="Belum dibaca" />
