@@ -141,7 +141,7 @@ export default function StudentDashboardPage() {
                 disabled={Boolean(submittingAction)}
               >
                 {submittingAction === 'check_in' && <LoaderCircle size={16} className="animate-spin" />}
-                Check In
+                Absen Masuk
               </button>
               <button
                 type="button"
@@ -150,7 +150,7 @@ export default function StudentDashboardPage() {
                 disabled={Boolean(submittingAction)}
               >
                 {submittingAction === 'check_out' && <LoaderCircle size={16} className="animate-spin" />}
-                Check Out
+                Absen Pulang
               </button>
             </div>
             {message && <p className="field-note mt-4 border-slate-200 bg-white text-slate-600">{message}</p>}

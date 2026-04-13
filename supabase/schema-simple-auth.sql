@@ -517,8 +517,8 @@ declare
   target_point public.attendance_points;
   target_settings public.attendance_settings;
   existing_attendance public.attendances;
-  today_date date := current_date;
-  local_now time := localtime;
+  today_date date := (timezone('Asia/Jakarta', now()))::date;
+  local_now time := (timezone('Asia/Jakarta', now()))::time;
   computed_distance double precision;
   resulting_status public.attendance_status;
   affected_row public.attendances;
