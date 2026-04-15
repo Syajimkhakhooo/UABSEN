@@ -154,17 +154,17 @@ export default function SettingsPage() {
 
         <div className="surface-subtle p-4 md:p-5">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-ink">Jam Check-In</h3>
+            <h3 className="text-sm font-semibold text-ink">Jam Absen Masuk</h3>
             <p className="mt-1 text-xs leading-6 text-slate-500">
-              Atur kapan siswa boleh mulai absen, kapan status hadir berakhir, dan batas akhir check-in.
+              Atur kapan siswa boleh mulai absen, kapan status hadir berakhir, dan batas akhir absen masuk.
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div className="h-full">
-              <label className="mb-2 block text-sm font-semibold text-slate-600">Mulai Check-In</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-600">Mulai Absen Masuk</label>
               <p className="mb-2 min-h-[40px] text-xs leading-5 text-slate-400">
-                Jam paling awal siswa boleh check-in.
+                Jam paling awal siswa boleh absen masuk.
               </p>
               <input
                 type="time"
@@ -195,9 +195,9 @@ export default function SettingsPage() {
               />
             </div>
             <div className="h-full">
-              <label className="mb-2 block text-sm font-semibold text-slate-600">Akhir Check-In</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-600">Akhir Absen Masuk</label>
               <p className="mb-2 min-h-[40px] text-xs leading-5 text-slate-400">
-                Setelah jam ini siswa tidak bisa check-in lagi.
+                Setelah jam ini siswa tidak bisa absen masuk lagi.
               </p>
               <input
                 type="time"
@@ -210,16 +210,16 @@ export default function SettingsPage() {
 
         <div className="surface-subtle p-4 md:p-5">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-ink">Jam Check-Out</h3>
+            <h3 className="text-sm font-semibold text-ink">Jam Absen Keluar</h3>
             <p className="mt-1 text-xs leading-6 text-slate-500">
-              Atur jam mulai dan akhir ketika siswa diizinkan melakukan check-out.
+              Atur jam mulai dan akhir ketika siswa diizinkan melakukan absen keluar.
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">Mulai Check-Out</label>
-              <p className="mb-2 text-xs text-slate-400">Jam paling awal siswa boleh check-out.</p>
+              <label className="mb-2 block text-sm font-semibold text-slate-600">Mulai Absen Keluar</label>
+              <p className="mb-2 text-xs text-slate-400">Jam paling awal siswa boleh absen keluar.</p>
               <input
                 type="time"
                 value={form.check_out_start}
@@ -227,8 +227,8 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">Akhir Check-Out</label>
-              <p className="mb-2 text-xs text-slate-400">Setelah jam ini check-out tidak diterima sistem.</p>
+              <label className="mb-2 block text-sm font-semibold text-slate-600">Akhir Absen Keluar</label>
+              <p className="mb-2 text-xs text-slate-400">Setelah jam ini absen keluar tidak diterima sistem.</p>
               <input
                 type="time"
                 value={form.check_out_end}

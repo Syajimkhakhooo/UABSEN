@@ -90,8 +90,8 @@ export default function AttendanceHistoryPage() {
               <tr>
                 <th>Tanggal</th>
                 <th>Status</th>
-                <th>Check In</th>
-                <th>Check Out</th>
+                <th>Absen Masuk</th>
+                <th>Absen Keluar</th>
                 <th>Catatan</th>
               </tr>
             </thead>
@@ -102,8 +102,8 @@ export default function AttendanceHistoryPage() {
                   <td data-label="Status">
                     <StatusBadge status={record.attendance_status} />
                   </td>
-                  <td data-label="Check In">{formatDateTime(record.check_in_at)}</td>
-                  <td data-label="Check Out">{formatDateTime(record.check_out_at)}</td>
+                  <td data-label="Absen Masuk">{formatDateTime(record.check_in_at)}</td>
+                  <td data-label="Absen Keluar">{formatDateTime(record.check_out_at)}</td>
                   <td data-label="Catatan">{record.correction_note || '-'}</td>
                 </tr>
               ))}

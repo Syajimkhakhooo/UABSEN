@@ -16,13 +16,13 @@ const featureCards = [
     icon: MapPinned,
     title: 'Absensi Berbasis Lokasi',
     description:
-      'Validasi check-in dan check-out memakai koordinat, radius, dan akurasi GPS agar absensi lebih disiplin.',
+      'Validasi absen masuk dan absen keluar memakai koordinat, radius, dan akurasi GPS agar absensi lebih disiplin.',
   },
   {
     icon: Clock3,
     title: 'Jadwal Absensi yang Jelas',
     description:
-      'Siswa dapat mengikuti alur check-in, batas hadir, toleransi terlambat, dan check-out dengan aturan yang konsisten.',
+      'Siswa dapat mengikuti alur absen masuk, batas hadir, toleransi terlambat, dan absen keluar dengan aturan yang konsisten.',
   },
   {
     icon: BellRing,
@@ -44,7 +44,7 @@ const workflowItems = [
     description: 'Portal dirancang agar siswa bisa langsung masuk ke alur absensi dengan tampilan yang ringkas dan mudah dipahami.',
   },
   {
-    title: 'Siswa melakukan check-in dan check-out',
+    title: 'Siswa melakukan absen masuk dan absen keluar',
     description: 'Aplikasi mengambil GPS perangkat lalu mencocokkan lokasi dan waktu dengan aturan yang sudah ditetapkan.',
   },
   {
@@ -90,7 +90,7 @@ export default function LandingPage() {
             <div className="public-chip-grid sm:grid-cols-3">
               {[
                 { value: 'GPS', label: 'Validasi lokasi real-time' },
-                { value: 'Jam', label: 'Kontrol check-in dan check-out' },
+                { value: 'Jam', label: 'Kontrol absen masuk dan absen keluar' },
                 { value: 'Log', label: 'Audit dan notifikasi terpusat' },
               ].map((item) => (
                 <div key={item.value} className="public-panel-soft p-4">
@@ -122,7 +122,7 @@ export default function LandingPage() {
                 <div className="public-panel-soft p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-ink">Check-in berbasis radius</p>
+                      <p className="text-sm font-semibold text-ink">Absen masuk berbasis radius</p>
                       <p className="mt-1 text-sm leading-6 text-slate-500">
                         Sistem menilai lokasi, akurasi GPS, dan aturan waktu dalam satu proses.
                       </p>
@@ -135,7 +135,7 @@ export default function LandingPage() {
                   <div className="card border-slate-200/70 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Absensi</p>
                     <p className="mt-3 text-lg font-semibold tracking-[-0.03em] text-ink">
-                      Check-in dan check-out terasa lebih jelas dengan validasi lokasi dan waktu yang konsisten.
+                      Absen masuk dan absen keluar terasa lebih jelas dengan validasi lokasi dan waktu yang konsisten.
                     </p>
                   </div>
                   <div className="card border-slate-200/70 p-4">

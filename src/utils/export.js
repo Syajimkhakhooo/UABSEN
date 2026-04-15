@@ -36,7 +36,7 @@ export function exportAttendancePdf(records, filename = 'laporan-absensi.pdf', t
 
   autoTable(doc, {
     startY: 26,
-    head: [['Tanggal', 'Siswa', 'No. Induk', 'Status', 'Check In', 'Check Out']],
+    head: [['Tanggal', 'Siswa', 'No. Induk', 'Status', 'Absen Masuk', 'Absen Keluar']],
     body: records.map((record) => [
       formatDate(record.attendance_date),
       record.students?.name ?? '-',

@@ -77,7 +77,7 @@ export default function LoginPage() {
 
             <div className="public-chip-grid md:grid-cols-3">
               {[
-                'Validasi check-in/check-out berbasis lokasi',
+                'Validasi absen masuk/absen keluar berbasis lokasi',
                 'Pengajuan izin dan sakit dengan approval admin',
                 'Audit log, notifikasi, PDF, dan CSV siap pakai',
               ].map((item) => (

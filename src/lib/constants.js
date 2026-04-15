@@ -100,4 +100,4 @@ export const LEAVE_TYPE_OPTIONS = [
 ];
 
 export const SETTINGS_HELP_TEXT =
-  'Koordinat, radius, dan jam absensi pada halaman ini menjadi aturan utama validasi check-in dan check-out. Setelah batas akhir check-in terlewati, siswa aktif yang belum mengisi absensi akan dianggap alpa.';
+  'Koordinat, radius, dan jam absensi pada halaman ini menjadi aturan utama validasi absen masuk dan absen keluar. Setelah batas akhir absen masuk terlewati, siswa aktif yang belum mengisi absensi akan dianggap alpa.';

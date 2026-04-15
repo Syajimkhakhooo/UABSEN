@@ -590,13 +590,13 @@ begin
 
   if action_name = 'check_in' then
     if existing_attendance.check_in_at is not null then
-      raise exception 'Check-in hari ini sudah tercatat.';
+      raise exception 'Absen masuk hari ini sudah tercatat.';
     end if;
 
     if local_now < target_settings.check_in_start or local_now > target_settings.check_in_end then
       insert into public.audit_logs (action, description, metadata)
-      values ('attendance_reject_time', 'Check-in ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
-      raise exception 'Waktu check-in tidak valid. Saat ini jam % sedangkan check-in hanya dibuka dari jam % sampai jam %.', 
+      values ('attendance_reject_time', 'Absen masuk ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
+      raise exception 'Waktu absen masuk tidak valid. Saat ini jam % sedangkan absen masuk hanya dibuka dari jam % sampai jam %.', 
         substring(local_now::text from 1 for 5), 
         substring(target_settings.check_in_start::text from 1 for 5), 
         substring(target_settings.check_in_end::text from 1 for 5);
@@ -633,21 +633,21 @@ begin
     returning * into affected_row;
 
     insert into public.notifications (recipient_auth_user_id, title, message, event_type)
-    values (auth.uid(), 'Check-in berhasil', 'Check-in Anda berhasil dicatat oleh sistem.', 'attendance_success');
+    values (auth.uid(), 'Absen masuk berhasil', 'Absen masuk Anda berhasil dicatat oleh sistem.', 'attendance_success');
 
     insert into public.audit_logs (action, description, metadata)
-    values ('attendance_check_in', 'Siswa melakukan check-in.', jsonb_build_object('student_id', target_student.id, 'status', resulting_status));
+    values ('attendance_check_in', 'Siswa melakukan absen masuk.', jsonb_build_object('student_id', target_student.id, 'status', resulting_status));
 
     return affected_row;
   elsif action_name = 'check_out' then
     if existing_attendance.check_out_at is not null then
-      raise exception 'Check-out hari ini sudah tercatat.';
+      raise exception 'Absen keluar hari ini sudah tercatat.';
     end if;
 
     if local_now < target_settings.check_out_start or local_now > target_settings.check_out_end then
       insert into public.audit_logs (action, description, metadata)
-      values ('attendance_reject_time', 'Check-out ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
-      raise exception 'Waktu check-out tidak valid. Saat ini jam % sedangkan check-out hanya dibuka dari jam % sampai jam %.', 
+      values ('attendance_reject_time', 'Absen keluar ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
+      raise exception 'Waktu absen keluar tidak valid. Saat ini jam % sedangkan absen keluar hanya dibuka dari jam % sampai jam %.', 
         substring(local_now::text from 1 for 5), 
         substring(target_settings.check_out_start::text from 1 for 5), 
         substring(target_settings.check_out_end::text from 1 for 5);
@@ -664,14 +664,14 @@ begin
     returning * into affected_row;
 
     if affected_row.id is null then
-      raise exception 'Check-in belum ditemukan untuk hari ini.';
+      raise exception 'Absen masuk belum ditemukan untuk hari ini.';
     end if;
 
     insert into public.notifications (recipient_auth_user_id, title, message, event_type)
-    values (auth.uid(), 'Check-out berhasil', 'Check-out Anda berhasil dicatat oleh sistem.', 'attendance_success');
+    values (auth.uid(), 'Absen keluar berhasil', 'Absen keluar Anda berhasil dicatat oleh sistem.', 'attendance_success');
 
     insert into public.audit_logs (action, description, metadata)
-    values ('attendance_check_out', 'Siswa melakukan check-out.', jsonb_build_object('student_id', target_student.id));
+    values ('attendance_check_out', 'Siswa melakukan absen keluar.', jsonb_build_object('student_id', target_student.id));
 
     return affected_row;
   else

@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
           ) : (
             <EmptyState
               title="Belum ada absensi hari ini"
-              description="Data akan muncul setelah siswa melakukan check-in atau ada koreksi admin."
+              description="Data akan muncul setelah siswa melakukan absen masuk atau ada koreksi admin."
             />
           )}
         </SectionCard>

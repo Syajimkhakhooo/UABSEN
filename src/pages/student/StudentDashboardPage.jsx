@@ -27,15 +27,15 @@ export default function StudentDashboardPage() {
     }
 
     if (action === 'check_in' && todayAttendance.check_in_at) {
-      return 'Check-in hari ini sudah tercatat.';
+      return 'Absen masuk hari ini sudah tercatat.';
     }
 
     if (action === 'check_out' && !todayAttendance.check_in_at) {
-      return 'Check-in belum tercatat untuk hari ini.';
+      return 'Absen masuk belum tercatat untuk hari ini.';
     }
 
     if (action === 'check_out' && todayAttendance.check_out_at) {
-      return 'Check-out hari ini sudah tercatat.';
+      return 'Absen keluar hari ini sudah tercatat.';
     }
 
     return '';
@@ -71,9 +71,9 @@ export default function StudentDashboardPage() {
       );
       await logAudit(
         action === 'check_in' ? 'attendance_check_in' : 'attendance_check_out',
-        action === 'check_in' ? 'Siswa melakukan check-in.' : 'Siswa melakukan check-out.',
+        action === 'check_in' ? 'Siswa melakukan absen masuk.' : 'Siswa melakukan absen keluar.',
       );
-      setMessage(action === 'check_in' ? 'Check-in berhasil diproses.' : 'Check-out berhasil diproses.');
+      setMessage(action === 'check_in' ? 'Absen masuk berhasil diproses.' : 'Absen keluar berhasil diproses.');
       await loadDashboard();
     } catch (err) {
       setMessage(toUserMessage(err, 'Absensi gagal diproses. Coba lagi sebentar.'));
@@ -150,7 +150,7 @@ export default function StudentDashboardPage() {
                 disabled={Boolean(submittingAction)}
               >
                 {submittingAction === 'check_out' && <LoaderCircle size={16} className="animate-spin" />}
-                Absen Pulang
+                Absen Keluar
               </button>
             </div>
             {message && <p className="field-note mt-4 border-slate-200 bg-white text-slate-600">{message}</p>}
@@ -162,11 +162,11 @@ export default function StudentDashboardPage() {
                   <StatusBadge status={data.todayAttendance.attendance_status} />
                 </div>
                 <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-slate-500">Check In</span>
+                  <span className="text-slate-500">Absen Masuk</span>
                   <span className="font-semibold text-ink">{formatDateTime(data.todayAttendance.check_in_at)}</span>
                 </div>
                 <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-slate-500">Check Out</span>
+                  <span className="text-slate-500">Absen Keluar</span>
                   <span className="font-semibold text-ink">{formatDateTime(data.todayAttendance.check_out_at)}</span>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function StudentDashboardPage() {
               <div className="mt-5">
                 <EmptyState
                   title="Belum ada absensi hari ini"
-                  description="Gunakan tombol check-in ketika sudah berada di lokasi absensi."
+                  description="Gunakan tombol absen masuk ketika sudah berada di lokasi absensi."
                 />
               </div>
             )}

@@ -143,8 +143,8 @@ export default function AttendanceDataPage() {
                 <th>Siswa</th>
                 <th>Tanggal</th>
                 <th>Status</th>
-                <th>Check In</th>
-                <th>Check Out</th>
+                <th>Absen Masuk</th>
+                <th>Absen Keluar</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -159,8 +159,8 @@ export default function AttendanceDataPage() {
                   <td data-label="Status">
                     <StatusBadge status={record.attendance_status} />
                   </td>
-                  <td data-label="Check In">{formatDateTime(record.check_in_at)}</td>
-                  <td data-label="Check Out">{formatDateTime(record.check_out_at)}</td>
+                  <td data-label="Absen Masuk">{formatDateTime(record.check_in_at)}</td>
+                  <td data-label="Absen Keluar">{formatDateTime(record.check_out_at)}</td>
                   <td data-label="Aksi">
                     <button
                       type="button"
@@ -202,12 +202,12 @@ export default function AttendanceDataPage() {
             <DateTimeField
               value={correction.check_in_at}
               onChange={(nextValue) => setCorrection((value) => ({ ...value, check_in_at: nextValue }))}
-              datePlaceholder="Tanggal check in"
+              datePlaceholder="Tanggal absen masuk"
             />
             <DateTimeField
               value={correction.check_out_at}
               onChange={(nextValue) => setCorrection((value) => ({ ...value, check_out_at: nextValue }))}
-              datePlaceholder="Tanggal check out"
+              datePlaceholder="Tanggal absen keluar"
             />
           </div>
           <textarea
