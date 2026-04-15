@@ -627,7 +627,10 @@ begin
     if local_now < target_settings.check_in_start or local_now > target_settings.check_in_end then
       insert into public.audit_logs (action, description, metadata)
       values ('attendance_reject_time', 'Check-in ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
-      raise exception 'Waktu check-in tidak valid.';
+      raise exception 'Waktu check-in tidak valid. Saat ini jam % sedangkan check-in hanya dibuka dari jam % sampai jam %.', 
+        substring(local_now::text from 1 for 5), 
+        substring(target_settings.check_in_start::text from 1 for 5), 
+        substring(target_settings.check_in_end::text from 1 for 5);
     end if;
 
     resulting_status := case when local_now <= target_settings.present_cutoff then 'present' else 'late' end;
@@ -675,7 +678,10 @@ begin
     if local_now < target_settings.check_out_start or local_now > target_settings.check_out_end then
       insert into public.audit_logs (action, description, metadata)
       values ('attendance_reject_time', 'Check-out ditolak karena di luar waktu absensi.', jsonb_build_object('time', local_now));
-      raise exception 'Waktu check-out tidak valid.';
+      raise exception 'Waktu check-out tidak valid. Saat ini jam % sedangkan check-out hanya dibuka dari jam % sampai jam %.', 
+        substring(local_now::text from 1 for 5), 
+        substring(target_settings.check_out_start::text from 1 for 5), 
+        substring(target_settings.check_out_end::text from 1 for 5);
     end if;
 
     update public.attendances
