@@ -34,7 +34,7 @@ export default function NotificationDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-[min(340px,calc(100vw-1rem))] rounded-[16px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)]">
+        <div className="absolute -right-[84px] sm:right-0 top-11 z-50 w-[calc(100vw-2rem)] max-w-[340px] sm:w-[340px] rounded-[16px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)]">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-ink">Notifikasi</p>
