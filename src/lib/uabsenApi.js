@@ -343,6 +343,24 @@ export async function saveStudent(student) {
   );
 }
 
+export async function bulkImportStudents(studentsArray) {
+  if (!studentsArray || studentsArray.length === 0) return 0;
+
+  // Hapus duplikat di dalam file CSV berdasarkan no induk (ambil yang paling bawah)
+  const uniqueStudentsMap = new Map();
+  for (const student of studentsArray) {
+    uniqueStudentsMap.set(student.student_number, student);
+  }
+  const uniqueStudentsArray = Array.from(uniqueStudentsMap.values());
+
+  const data = await ensureSuccess(
+    supabase.from('students').upsert(uniqueStudentsArray, { onConflict: 'student_number' }).select(),
+    'Gagal mengimpor data siswa dari CSV. Pastikan format data benar.',
+  );
+
+  return data.length;
+}
+
 export async function createStudentAccount(payload) {
   const { data: { user: adminUser } } = await withTimeout(
     supabase.auth.getUser(),
@@ -524,6 +542,21 @@ export async function deleteStudent(studentId) {
   return true;
 }
 
+export async function deleteAllStudents() {
+  const { error } = await supabase.rpc('delete_all_students_and_accounts');
+
+  if (error) {
+    if ((error.message ?? '').includes('Could not find the function public.delete_all_students_and_accounts')) {
+      throw new Error(
+        'Fungsi hapus semua siswa belum ada di database Supabase. Jalankan SQL file `supabase/delete-all-students-function.sql` dulu di SQL Editor.',
+      );
+    }
+    throw new Error(error.message ?? 'Gagal menghapus semua siswa.');
+  }
+
+  return true;
+}
+
 export async function listAttendance(filters = {}) {
   await ensureDailyAbsencesIfPossible();
 
@@ -543,16 +576,38 @@ export async function listAttendance(filters = {}) {
   return ensureSuccess(query, 'Gagal memuat data absensi.');
 }
 
-export async function performAttendanceAction(action, latitude, longitude, accuracy) {
+export async function performAttendanceAction(action, latitude, longitude, photoPath, accuracy) {
   return ensureSuccess(
     supabase.rpc('perform_attendance_action', {
       action_name: action,
       input_latitude: latitude,
       input_longitude: longitude,
+      input_photo_path: photoPath,
       input_accuracy: accuracy ?? null,
     }),
     'Gagal memproses absensi.',
   );
+}
+
+export async function uploadAttendancePhoto(file, studentId, action) {
+  // Gunakan kompresi ringan atau langsung upload (kita asumsikan file sudah siap)
+  const fileExt = file.name.split('.').pop() || 'jpg';
+  const fileName = `${studentId}/${action}_${Date.now()}.${fileExt}`;
+
+  const { data, error } = await supabase.storage
+    .from('attendance-photos')
+    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+  if (error) {
+    throw normalizeError(error, 'Gagal mengunggah foto absensi.');
+  }
+
+  // Mengembalikan public URL agar mudah diakses
+  const { data: publicUrlData } = supabase.storage
+    .from('attendance-photos')
+    .getPublicUrl(data.path);
+
+  return publicUrlData.publicUrl;
 }
 
 export async function manualCorrectAttendance(payload) {

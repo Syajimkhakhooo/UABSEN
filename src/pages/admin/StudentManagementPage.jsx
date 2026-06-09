@@ -1,5 +1,6 @@
-import { KeyRound, Plus, UserRoundPlus } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { KeyRound, Plus, UserRoundPlus, Upload } from 'lucide-react';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import Papa from 'papaparse';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import EmptyState from '../../components/EmptyState';
 import Modal from '../../components/Modal';
@@ -13,6 +14,8 @@ import {
   logAudit,
   resetStudentPassword,
   saveStudent,
+  bulkImportStudents,
+  deleteAllStudents,
 } from '../../lib/uabsenApi';
 
 const initialStudentForm = {
@@ -48,7 +51,10 @@ export default function StudentManagementPage() {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, studentId: '', studentName: '' });
+  const [deleteAllDialog, setDeleteAllDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingCsv, setUploadingCsv] = useState(false);
+  const fileInputRef = useRef(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -130,6 +136,23 @@ export default function StudentManagementPage() {
     }
   }
 
+  async function handleDeleteAllStudents() {
+    setSubmitting(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await deleteAllStudents();
+      await loadStudents();
+      setDeleteAllDialog(false);
+      setSuccess('Seluruh data siswa berhasil dihapus.');
+    } catch (err) {
+      setError(toUserMessage(err, 'Seluruh data siswa belum bisa dihapus. Coba lagi sebentar.'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function handleResetPasswordSubmit(event) {
     event.preventDefault();
     setSubmitting(true);
@@ -166,6 +189,73 @@ export default function StudentManagementPage() {
     }
   }
 
+  const handleImportCsv = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCsv(true);
+    setError('');
+    setSuccess('');
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const rawData = results.data;
+
+          if (!rawData.length) {
+            throw new Error('File CSV kosong atau tidak valid.');
+          }
+
+          const studentsToImport = rawData.map((row) => {
+            const rowKeys = Object.keys(row);
+            const getVal = (possibleNames) => {
+              for (const key of rowKeys) {
+                if (possibleNames.includes(key.trim().toLowerCase())) {
+                  return row[key]?.trim() || '';
+                }
+              }
+              return '';
+            };
+
+            return {
+              student_number: getVal(['no induk', 'nomor induk', 'student_number', 'nim', 'nis', 'no. induk']),
+              name: getVal(['nama siswa', 'nama', 'name']),
+              phone: getVal(['no. telepon', 'no telepon', 'telepon', 'phone']),
+              training_program: getVal(['program', 'training program', 'training_program']),
+              address: getVal(['alamat', 'address']),
+              active: true,
+            };
+          }).filter(s => s.student_number && s.name); // Pastikan minimal ada no induk dan nama
+
+          if (studentsToImport.length === 0) {
+            throw new Error('Tidak ada data yang valid untuk diimpor. Pastikan header CSV memiliki kolom "no induk" dan "nama siswa".');
+          }
+
+          const count = await bulkImportStudents(studentsToImport);
+          await logAudit('student_bulk_import', `Admin mengimpor ${count} data siswa dari CSV.`);
+          setSuccess(`Berhasil mengimpor ${count} data siswa baru.`);
+          await loadStudents();
+        } catch (err) {
+          setError(toUserMessage(err, 'Gagal mengimpor file CSV. Pastikan tidak ada nomor induk yang duplikat.'));
+        } finally {
+          setUploadingCsv(false);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }
+      },
+      error: (err) => {
+        setError(`Gagal membaca file CSV: ${err.message}`);
+        setUploadingCsv(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    });
+  };
+
   return (
     <div className="grid gap-6">
       <div className="grid gap-4 sm:grid-cols-3">
@@ -185,9 +275,32 @@ export default function StudentManagementPage() {
         description="Admin dapat membuat master data siswa tanpa akun login, lalu menautkannya ke profile login kapan saja."
         actions={
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <input
+              type="file"
+              accept=".csv"
+              ref={fileInputRef}
+              onChange={handleImportCsv}
+              className="hidden"
+            />
             <button
               type="button"
               className="btn-secondary w-full sm:w-auto"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingCsv}
+            >
+              <Upload size={16} />
+              {uploadingCsv ? 'Mengimpor...' : 'Import CSV'}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary w-full sm:w-auto text-rose-600 border-rose-200 hover:bg-rose-50"
+              onClick={() => setDeleteAllDialog(true)}
+            >
+              Hapus Semua
+            </button>
+            <button
+              type="button"
+              className="btn-primary w-full sm:w-auto"
               onClick={() => {
                 setStudentForm(initialStudentForm);
                 setStudentModalOpen(true);
@@ -512,6 +625,18 @@ export default function StudentManagementPage() {
         title={`Hapus seluruh data untuk ${deleteDialog.studentName || 'siswa'}?`}
         description="PERINGATAN: tindakan ini permanen. Riwayat absen, surat izin, dan akun login siswa yang tertaut akan ikut terhapus."
         confirmText="Ya, hapus"
+        cancelText="Batal"
+        tone="danger"
+      />
+
+      <ConfirmDialog
+        open={deleteAllDialog}
+        onClose={() => setDeleteAllDialog(false)}
+        onConfirm={handleDeleteAllStudents}
+        confirming={submitting}
+        title="Hapus SELURUH data siswa?"
+        description="PERINGATAN SANGAT FATAL: Ini akan menghapus SEMUA siswa dari database, termasuk riwayat absen, pengajuan izin, dan mencabut semua akses login mereka secara permanen! Pastikan Anda benar-benar yakin."
+        confirmText="Ya, HAPUS SEMUA"
         cancelText="Batal"
         tone="danger"
       />

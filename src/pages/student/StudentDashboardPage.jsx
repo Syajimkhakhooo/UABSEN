@@ -1,12 +1,12 @@
-import { LoaderCircle, MapPinned } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { LoaderCircle, MapPinned, Camera } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import EmptyState from '../../components/EmptyState';
 import SectionCard from '../../components/SectionCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useAuth } from '../../hooks/useAuth';
 import { toUserMessage } from '../../lib/errorMessages';
-import { getStudentDashboardData, logAudit, performAttendanceAction } from '../../lib/uabsenApi';
-import { getCurrentPosition } from '../../utils/attendance';
+import { getStudentDashboardData, logAudit, performAttendanceAction, uploadAttendancePhoto, getAttendanceSettings } from '../../lib/uabsenApi';
+import { getCurrentPosition, calculateDistance } from '../../utils/attendance';
 import { formatDate, formatDateTime } from '../../utils/format';
 
 export default function StudentDashboardPage() {
@@ -14,6 +14,10 @@ export default function StudentDashboardPage() {
   const [data, setData] = useState(null);
   const [submittingAction, setSubmittingAction] = useState('');
   const [message, setMessage] = useState('');
+  const [attendancePoint, setAttendancePoint] = useState(null);
+  const fileInputRef = useRef(null);
+  const [pendingAction, setPendingAction] = useState(null); 
+  const [pendingLocation, setPendingLocation] = useState(null);
 
   function getAttendanceBlockMessage(action) {
     const todayAttendance = data?.todayAttendance;
@@ -43,15 +47,19 @@ export default function StudentDashboardPage() {
 
   async function loadDashboard() {
     if (!profile?.student_id) return;
-    const result = await getStudentDashboardData(profile.student_id);
+    const [result, settingsResult] = await Promise.all([
+       getStudentDashboardData(profile.student_id),
+       getAttendanceSettings()
+    ]);
     setData(result);
+    setAttendancePoint(settingsResult.attendancePoint);
   }
 
   useEffect(() => {
     loadDashboard();
   }, [profile?.student_id]);
 
-  async function handleAttendance(action) {
+  async function handleAttendanceStart(action) {
     setSubmittingAction(action);
     setMessage('');
 
@@ -59,26 +67,80 @@ export default function StudentDashboardPage() {
       const blockedMessage = getAttendanceBlockMessage(action);
       if (blockedMessage) {
         setMessage(blockedMessage);
+        setSubmittingAction('');
         return;
       }
 
+      if (!attendancePoint) {
+         throw new Error("Pengaturan lokasi absensi belum dimuat. Coba refresh halaman.");
+      }
+
       const position = await getCurrentPosition();
-      await performAttendanceAction(
-        action,
+      
+      const distance = calculateDistance(
         position.coords.latitude,
         position.coords.longitude,
-        position.coords.accuracy,
+        attendancePoint.latitude,
+        attendancePoint.longitude
       );
-      await logAudit(
-        action === 'check_in' ? 'attendance_check_in' : 'attendance_check_out',
-        action === 'check_in' ? 'Siswa melakukan absen masuk.' : 'Siswa melakukan absen keluar.',
-      );
-      setMessage(action === 'check_in' ? 'Absen masuk berhasil diproses.' : 'Absen keluar berhasil diproses.');
-      await loadDashboard();
+
+      if (distance > attendancePoint.radius_meters) {
+         throw new Error(`Anda berada di luar radius absensi. Jarak Anda: ${Math.round(distance)}m, Maksimal: ${Math.round(attendancePoint.radius_meters)}m`);
+      }
+
+      setPendingAction(action);
+      setPendingLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      } else {
+        throw new Error("Kamera tidak dapat diakses.");
+      }
+
     } catch (err) {
-      setMessage(toUserMessage(err, 'Absensi gagal diproses. Coba lagi sebentar.'));
-    } finally {
+      setMessage(toUserMessage(err, 'Gagal memverifikasi lokasi.'));
       setSubmittingAction('');
+    }
+  }
+
+  async function handlePhotoCapture(event) {
+    const file = event.target.files?.[0];
+    if (!file || !pendingAction || !pendingLocation) {
+       setSubmittingAction('');
+       return;
+    }
+
+    setMessage('Mengunggah foto dan memproses absensi...');
+
+    try {
+       const photoUrl = await uploadAttendancePhoto(file, profile.student_id, pendingAction);
+       
+       await performAttendanceAction(
+         pendingAction,
+         pendingLocation.latitude,
+         pendingLocation.longitude,
+         photoUrl,
+         pendingLocation.accuracy
+       );
+
+       await logAudit(
+         pendingAction === 'check_in' ? 'attendance_check_in' : 'attendance_check_out',
+         pendingAction === 'check_in' ? 'Siswa melakukan absen masuk dengan foto.' : 'Siswa melakukan absen keluar dengan foto.'
+       );
+       
+       setMessage(pendingAction === 'check_in' ? 'Absen masuk berhasil diproses.' : 'Absen keluar berhasil diproses.');
+       await loadDashboard();
+    } catch (err) {
+       setMessage(toUserMessage(err, 'Absensi gagal diproses. Coba lagi sebentar.'));
+    } finally {
+       setSubmittingAction('');
+       setPendingAction(null);
+       setPendingLocation(null);
+       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
@@ -137,7 +199,7 @@ export default function StudentDashboardPage() {
               <button
                 type="button"
                 className="btn-primary"
-                onClick={() => handleAttendance('check_in')}
+                onClick={() => handleAttendanceStart('check_in')}
                 disabled={Boolean(submittingAction)}
               >
                 {submittingAction === 'check_in' && <LoaderCircle size={16} className="animate-spin" />}
@@ -146,13 +208,21 @@ export default function StudentDashboardPage() {
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => handleAttendance('check_out')}
+                onClick={() => handleAttendanceStart('check_out')}
                 disabled={Boolean(submittingAction)}
               >
                 {submittingAction === 'check_out' && <LoaderCircle size={16} className="animate-spin" />}
                 Absen Keluar
               </button>
             </div>
+            <input
+              type="file"
+              accept="image/*"
+              capture="user"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handlePhotoCapture}
+            />
             {message && <p className="field-note mt-4 border-slate-200 bg-white text-slate-600">{message}</p>}
 
             {data?.todayAttendance ? (

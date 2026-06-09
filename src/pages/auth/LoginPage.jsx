@@ -59,47 +59,25 @@ export default function LoginPage() {
 
   return (
     <PublicPageFrame currentPath="/login" sectionBasePath="/" mainClassName="pb-14 md:pb-20">
-      <div className="public-hero-grid lg:grid-cols-[1.06fr_0.94fr]">
-          <section className="page-hero rounded-[28px]">
-            <div className="public-badge-primary">
+      <div className="public-hero-grid lg:grid-cols-2 lg:gap-8 lg:items-stretch">
+          <section className="public-panel flex h-full flex-col justify-center p-5 md:p-7">
+            <div className="inline-flex items-center gap-2 self-start rounded-full border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               <ShieldCheck size={14} />
               Portal Masuk UABSEN
             </div>
 
-            <h1 className="public-heading-xl">
+            <h1 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-ink md:text-3xl">
               Silahkan Login Untuk Melakukan Absensi 
             </h1>
 
-            <p className="public-copy">
+            <p className="mt-3 text-sm leading-6 text-slate-500">
               UABSEN membantu proses absensi harian tetap tertib dengan validasi lokasi, pengaturan jam, notifikasi,
               dan riwayat yang mudah dipantau dalam satu sistem.
             </p>
-
-            <div className="public-chip-grid md:grid-cols-3">
-              {[
-                'Validasi absen masuk/absen keluar berbasis lokasi',
-                'Pengajuan izin dan sakit dengan approval admin',
-                'Audit log, notifikasi, PDF, dan CSV siap pakai',
-              ].map((item) => (
-                <div key={item} className="public-panel-soft p-4">
-                  <p className="text-sm font-medium leading-6 text-slate-700">{item}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="public-action-row">
-              <a href="/#fitur" className="btn-secondary">
-                Lihat Fitur Utama
-              </a>
-              <a href="/#mulai" className="btn-secondary">
-                Pelajari Alurnya
-                <ArrowRight size={16} />
-              </a>
-            </div>
           </section>
 
-          <section className="public-panel p-5 md:p-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+          <section className="public-panel flex h-full flex-col justify-center p-5 md:p-7">
+            <div className="inline-flex items-center gap-2 self-start rounded-full border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               <Sparkles size={14} />
               Masuk ke Aplikasi
             </div>
