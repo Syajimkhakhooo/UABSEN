@@ -6,7 +6,7 @@ import Modal from '../../components/Modal';
 import SectionCard from '../../components/SectionCard';
 import StatusBadge from '../../components/StatusBadge';
 import { ATTENDANCE_TYPES } from '../../lib/constants';
-import { listAttendance, listStudents, logAudit, manualCorrectAttendance } from '../../lib/uabsenApi';
+import { listAttendance, listStudents, logAudit, manualCorrectAttendance, listClasses } from '../../lib/uabsenApi';
 import { exportAttendanceCsv, exportAttendancePdf } from '../../utils/export';
 import { formatDate, formatDateTime } from '../../utils/format';
 
@@ -21,8 +21,10 @@ const correctionInitialState = {
 export default function AttendanceDataPage() {
   const [records, setRecords] = useState([]);
   const [students, setStudents] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [filters, setFilters] = useState({
     studentId: '',
+    classId: '',
     status: '',
     dateFrom: '',
     dateTo: '',
@@ -36,6 +38,11 @@ export default function AttendanceDataPage() {
     [students],
   );
 
+  const classOptions = useMemo(
+    () => [{ value: '', label: 'Semua kelas' }, ...classes.map((cls) => ({ value: cls.id, label: cls.name }))],
+    [classes],
+  );
+
   const statusOptions = useMemo(
     () => [{ value: '', label: 'Semua status' }, ...ATTENDANCE_TYPES.map((status) => ({ value: status.value, label: status.label }))],
     [],
@@ -47,17 +54,19 @@ export default function AttendanceDataPage() {
   );
 
   async function loadData() {
-    const [attendanceData, studentData] = await Promise.all([
+    const [attendanceData, studentData, classData] = await Promise.all([
       listAttendance(filters),
       listStudents(),
+      listClasses(),
     ]);
     setRecords(attendanceData);
     setStudents(studentData);
+    setClasses(classData);
   }
 
   useEffect(() => {
     loadData();
-  }, [filters.studentId, filters.status, filters.dateFrom, filters.dateTo]);
+  }, [filters.studentId, filters.classId, filters.status, filters.dateFrom, filters.dateTo]);
 
   const summary = useMemo(
     () => ({
@@ -107,13 +116,55 @@ export default function AttendanceDataPage() {
             <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => exportAttendanceCsv(records)}>
               Export CSV
             </button>
-            <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => exportAttendancePdf(records)}>
+            <button
+              type="button"
+              className="btn-primary w-full sm:w-auto"
+              onClick={() => {
+                let periodText = 'PERIODE BULAN ....';
+                if (filters.dateFrom && filters.dateTo) {
+                  if (filters.dateFrom === filters.dateTo) {
+                    periodText = `TANGGAL ${formatDate(filters.dateFrom).toUpperCase()}`;
+                  } else {
+                    periodText = `PERIODE ${formatDate(filters.dateFrom).toUpperCase()} - ${formatDate(filters.dateTo).toUpperCase()}`;
+                  }
+                } else if (filters.dateFrom) {
+                  periodText = `MULAI TANGGAL ${formatDate(filters.dateFrom).toUpperCase()}`;
+                } else if (filters.dateTo) {
+                  periodText = `SAMPAI TANGGAL ${formatDate(filters.dateTo).toUpperCase()}`;
+                } else {
+                  periodText = 'KESELURUHAN WAKTU';
+                }
+
+                let title = 'REKAPITULASI ABSENSI SISWA';
+                if (filters.classId) {
+                  const cls = classes.find((c) => c.id === filters.classId);
+                  if (cls) {
+                    title = `REKAPITULASI ABSENSI SISWA - KELAS ${cls.name.toUpperCase()}`;
+                  }
+                }
+
+                if (filters.studentId) {
+                  const student = students.find((s) => s.id === filters.studentId);
+                  if (student) {
+                    title = `REKAPITULASI ABSENSI - ${student.name.toUpperCase()}`;
+                  }
+                }
+
+                exportAttendancePdf(records, 'data-absensi.pdf', { title, periodText });
+              }}
+            >
               Export PDF
             </button>
           </div>
         }
       >
-        <div className="mb-4 grid gap-3 md:grid-cols-4">
+        <div className="mb-4 grid gap-3 md:grid-cols-5">
+          <CustomSelect
+            value={filters.classId}
+            onChange={(nextValue) => setFilters((value) => ({ ...value, classId: nextValue }))}
+            options={classOptions}
+            placeholder="Semua kelas"
+          />
           <CustomSelect
             value={filters.studentId}
             onChange={(nextValue) => setFilters((value) => ({ ...value, studentId: nextValue }))}
@@ -133,6 +184,7 @@ export default function AttendanceDataPage() {
           <DatePicker
             value={filters.dateTo}
             onChange={(nextValue) => setFilters((value) => ({ ...value, dateTo: nextValue }))}
+            popoverAlign="right"
           />
         </div>
 

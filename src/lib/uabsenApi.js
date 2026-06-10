@@ -282,7 +282,7 @@ export async function getStudentDashboardData(studentId) {
 export async function listStudents(search = '') {
   let query = supabase
     .from('students')
-    .select('id, student_number, name, phone, address, training_program, active, created_at')
+    .select('id, student_number, name, phone, address, training_program, active, created_at, class_id, classes(name)')
     .order('created_at', { ascending: false });
 
   if (search) {
@@ -328,6 +328,7 @@ export async function saveStudent(student) {
     address: student.address,
     training_program: student.training_program,
     active: student.active,
+    class_id: student.class_id || null,
   };
 
   if (student.id) {
@@ -560,14 +561,17 @@ export async function deleteAllStudents() {
 export async function listAttendance(filters = {}) {
   await ensureDailyAbsencesIfPossible();
 
+  const selectQuery = filters.classId
+    ? 'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, correction_note, students!inner(name, student_number, class_id)'
+    : 'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, correction_note, students(name, student_number, class_id)';
+
   let query = supabase
     .from('attendances')
-    .select(
-      'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, correction_note, students(name, student_number)',
-    )
+    .select(selectQuery)
     .order('attendance_date', { ascending: false })
     .order('created_at', { ascending: false });
 
+  if (filters.classId) query = query.eq('students.class_id', filters.classId);
   if (filters.studentId) query = query.eq('student_id', filters.studentId);
   if (filters.status) query = query.eq('attendance_status', filters.status);
   if (filters.dateFrom) query = query.gte('attendance_date', filters.dateFrom);
@@ -824,4 +828,32 @@ export async function saveAttendanceSettings(payload) {
   }
 
   return true;
+}
+
+export async function listClasses() {
+  return ensureSuccess(
+    supabase.from('classes').select('*').order('name', { ascending: true }),
+    'Gagal memuat daftar kelas.',
+  );
+}
+
+export async function createClass(payload) {
+  return ensureSuccess(
+    supabase.from('classes').insert({ name: payload.name }).select().single(),
+    'Gagal membuat kelas.',
+  );
+}
+
+export async function updateClass(payload) {
+  return ensureSuccess(
+    supabase.from('classes').update({ name: payload.name }).eq('id', payload.id).select().single(),
+    'Gagal memperbarui kelas.',
+  );
+}
+
+export async function deleteClass(classId) {
+  return ensureSuccess(
+    supabase.from('classes').delete().eq('id', classId),
+    'Gagal menghapus kelas.',
+  );
 }

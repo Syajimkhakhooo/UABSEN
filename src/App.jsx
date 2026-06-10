@@ -12,6 +12,7 @@ const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const PendingAccessPage = lazy(() => import('./pages/auth/PendingAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const StudentManagementPage = lazy(() => import('./pages/admin/StudentManagementPage'));
+const ClassesManagementPage = lazy(() => import('./pages/admin/ClassesManagementPage'));
 const AttendanceDataPage = lazy(() => import('./pages/admin/AttendanceDataPage'));
 const LeaveRequestsPage = lazy(() => import('./pages/admin/LeaveRequestsPage'));
 const AdminNotificationsPage = lazy(() => import('./pages/admin/AdminNotificationsPage'));
@@ -70,6 +71,7 @@ export default function App() {
         >
           <Route index element={<AdminDashboardPage />} />
           <Route path="students" element={<StudentManagementPage />} />
+          <Route path="classes" element={<ClassesManagementPage />} />
           <Route path="attendance" element={<AttendanceDataPage />} />
           <Route path="leave-requests" element={<LeaveRequestsPage />} />
           <Route path="notifications" element={<AdminNotificationsPage />} />

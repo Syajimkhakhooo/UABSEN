@@ -20,6 +20,7 @@ export default function DatePicker({
   max,
   clearable = true,
   className = '',
+  popoverAlign = 'left',
 }) {
   const [open, setOpen] = useState(false);
   const [viewDate, setViewDate] = useState(() => getInitialViewDate(value));
@@ -76,7 +77,7 @@ export default function DatePicker({
       </button>
 
       {open && (
-        <div className="custom-popover absolute left-0 top-[calc(100%+0.55rem)] z-40 w-[min(19.5rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] p-3">
+        <div className={['custom-popover absolute top-[calc(100%+0.55rem)] z-40 w-[min(19.5rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] p-3', popoverAlign === 'right' ? 'right-0' : 'left-0'].join(' ')}>
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"

@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   UserRound,
   Users,
+  Layers,
 } from 'lucide-react';
 
 export const ROLE = {
@@ -33,6 +34,7 @@ export const REQUEST_STATUS_LABELS = {
 export const ADMIN_NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: Home },
   { to: '/admin/students', label: 'Data Siswa', icon: Users },
+  { to: '/admin/classes', label: 'Pengaturan Kelas', icon: Layers },
   { to: '/admin/attendance', label: 'Data Absensi', icon: ClipboardList },
   { to: '/admin/leave-requests', label: 'Izin & Sakit', icon: FileText },
   { to: '/admin/notifications', label: 'Notifikasi', icon: Bell },

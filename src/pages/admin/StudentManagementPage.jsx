@@ -16,6 +16,7 @@ import {
   saveStudent,
   bulkImportStudents,
   deleteAllStudents,
+  listClasses,
 } from '../../lib/uabsenApi';
 
 const initialStudentForm = {
@@ -25,6 +26,7 @@ const initialStudentForm = {
   phone: '',
   address: '',
   training_program: '',
+  class_id: '',
   active: true,
 };
 
@@ -43,6 +45,7 @@ const initialResetPasswordForm = {
 
 export default function StudentManagementPage() {
   const [students, setStudents] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [search, setSearch] = useState('');
   const [studentForm, setStudentForm] = useState(initialStudentForm);
   const [accountForm, setAccountForm] = useState(initialAccountForm);
@@ -59,8 +62,12 @@ export default function StudentManagementPage() {
   const [success, setSuccess] = useState('');
 
   async function loadStudents() {
-    const data = await listStudents(search);
+    const [data, classesData] = await Promise.all([
+      listStudents(search),
+      listClasses(),
+    ]);
     setStudents(data);
+    setClasses(classesData);
   }
 
   useEffect(() => {
@@ -333,7 +340,7 @@ export default function StudentManagementPage() {
               <thead>
                 <tr>
                   <th>Siswa</th>
-                  <th>Program</th>
+                  <th>Kelas & Program</th>
                   <th>Status</th>
                   <th>Login</th>
                   <th>Aksi</th>
@@ -348,7 +355,10 @@ export default function StudentManagementPage() {
                         <div className="font-semibold text-ink">{student.name}</div>
                         <div className="text-xs text-slate-500">{student.student_number}</div>
                       </td>
-                      <td data-label="Program">{student.training_program || '-'}</td>
+                      <td data-label="Kelas & Program">
+                        <div className="font-medium text-slate-700">{student.classes?.name || 'Belum ada kelas'}</div>
+                        <div className="text-xs text-slate-500">{student.training_program || '-'}</div>
+                      </td>
                       <td data-label="Status">
                         <span
                           className={`badge ${
@@ -478,6 +488,23 @@ export default function StudentManagementPage() {
                   setStudentForm((value) => ({ ...value, phone: event.target.value }))
                 }
               />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-600">Kelas</label>
+              <select
+                value={studentForm.class_id || ''}
+                onChange={(event) =>
+                  setStudentForm((value) => ({ ...value, class_id: event.target.value }))
+                }
+                className="input-field w-full"
+              >
+                <option value="">-- Pilih Kelas --</option>
+                {classes.map((cls) => (
+                  <option key={cls.id} value={cls.id}>
+                    {cls.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-600">Program</label>

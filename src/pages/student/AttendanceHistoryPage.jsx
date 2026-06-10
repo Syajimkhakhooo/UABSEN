@@ -48,7 +48,22 @@ export default function AttendanceHistoryPage() {
     if (type === 'csv') {
       exportAttendanceCsv(records, 'riwayat-absensi-saya.csv');
     } else {
-      exportAttendancePdf(records, 'riwayat-absensi-saya.pdf', 'Riwayat Absensi Saya');
+      let periodText = 'PERIODE BULAN ....';
+      if (filters.dateFrom && filters.dateTo) {
+        if (filters.dateFrom === filters.dateTo) {
+          periodText = `TANGGAL ${formatDate(filters.dateFrom).toUpperCase()}`;
+        } else {
+          periodText = `PERIODE ${formatDate(filters.dateFrom).toUpperCase()} - ${formatDate(filters.dateTo).toUpperCase()}`;
+        }
+      } else if (filters.dateFrom) {
+        periodText = `MULAI TANGGAL ${formatDate(filters.dateFrom).toUpperCase()}`;
+      } else if (filters.dateTo) {
+        periodText = `SAMPAI TANGGAL ${formatDate(filters.dateTo).toUpperCase()}`;
+      } else {
+        periodText = 'KESELURUHAN WAKTU';
+      }
+
+      exportAttendancePdf(records, 'riwayat-absensi-saya.pdf', { title: 'REKAPITULASI ABSENSI PRIBADI', periodText });
     }
 
     await logAudit('report_export', 'Siswa mengunduh riwayat absensi pribadi.', {
