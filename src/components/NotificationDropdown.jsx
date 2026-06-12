@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../hooks/useNotifications';
 import { formatDateTime } from '../utils/format';
+import Modal from './Modal';
 
 export default function NotificationDropdown() {
   const { profile } = useAuth();
@@ -12,6 +13,8 @@ export default function NotificationDropdown() {
     profile?.auth_user_id,
     profile?.role,
   );
+
+  const [selectedNotification, setSelectedNotification] = useState(null);
 
   const targetPath = profile?.role === 'admin' ? '/admin/notifications' : '/student/notifications';
 
@@ -51,14 +54,18 @@ export default function NotificationDropdown() {
               <button
                 key={notification.id}
                 type="button"
-                onClick={() => readOne(notification.id)}
+                onClick={() => {
+                  readOne(notification.id);
+                  setSelectedNotification(notification);
+                  setOpen(false); // Close dropdown when opening modal
+                }}
                 className={[
-                  'rounded-xl border px-3 py-3 text-left',
+                  'rounded-xl border px-3 py-3 text-left transition-colors hover:border-slate-300',
                   notification.is_read ? 'border-slate-200 bg-slate-50' : 'border-sky-100 bg-sky-50',
                 ].join(' ')}
               >
-                <p className="text-sm font-semibold text-ink">{notification.title}</p>
-                <p className="mt-1 text-xs text-slate-600">{notification.message}</p>
+                <p className="text-sm font-semibold text-ink line-clamp-1">{notification.title}</p>
+                <p className="mt-1 text-xs text-slate-600 line-clamp-2">{notification.message}</p>
                 <p className="mt-2 text-[11px] text-slate-400">{formatDateTime(notification.created_at)}</p>
               </button>
             ))}
@@ -71,6 +78,22 @@ export default function NotificationDropdown() {
           </Link>
         </div>
       )}
+
+      <Modal
+        open={Boolean(selectedNotification)}
+        onClose={() => setSelectedNotification(null)}
+        title={selectedNotification?.title}
+        description={selectedNotification ? formatDateTime(selectedNotification.created_at) : ''}
+      >
+        <div className="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
+          {selectedNotification?.message}
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button type="button" className="btn-primary" onClick={() => setSelectedNotification(null)}>
+            Tutup
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

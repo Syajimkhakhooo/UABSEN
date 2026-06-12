@@ -121,8 +121,8 @@ export default function AttendanceDataPage() {
             </button>
             <button
               type="button"
-              className="btn-primary w-full sm:w-auto"
-              onClick={() => {
+              className="btn-primary flex items-center gap-2"
+              onClick={async () => {
                 let periodText = 'PERIODE BULAN ....';
                 if (filters.dateFrom && filters.dateTo) {
                   if (filters.dateFrom === filters.dateTo) {
@@ -142,7 +142,7 @@ export default function AttendanceDataPage() {
                 if (filters.classId) {
                   const cls = classes.find((c) => c.id === filters.classId);
                   if (cls) {
-                    title = `REKAPITULASI ABSENSI SISWA - KELAS ${cls.name.toUpperCase()}`;
+                    title = `REKAPITULASI ABSENSI SISWA - ${cls.name.toUpperCase()}`;
                   }
                 }
 
@@ -153,7 +153,7 @@ export default function AttendanceDataPage() {
                   }
                 }
 
-                exportAttendancePdf(records, 'data-absensi.pdf', { title, periodText });
+                await exportAttendancePdf(records, 'data-absensi.pdf', { title, periodText });
               }}
             >
               Export PDF

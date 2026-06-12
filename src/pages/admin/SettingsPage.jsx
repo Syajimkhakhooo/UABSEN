@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import SectionCard from '../../components/SectionCard';
 import { DEFAULT_SETTINGS, SETTINGS_HELP_TEXT } from '../../lib/constants';
-import { getAttendanceSettings, logAudit, saveAttendanceSettings } from '../../lib/uabsenApi';
+import { getAttendanceSettings, logAudit, saveAttendanceSettings, cleanupOldAttendancePhotos } from '../../lib/uabsenApi';
 
 export default function SettingsPage() {
   const [form, setForm] = useState(DEFAULT_SETTINGS);
@@ -9,6 +9,10 @@ export default function SettingsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  const [cleanupMonths, setCleanupMonths] = useState(3);
+  const [cleaningUp, setCleaningUp] = useState(false);
+  const [cleanupMsg, setCleanupMsg] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -92,8 +96,26 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleCleanup() {
+    if (!window.confirm(`Yakin ingin menghapus semua foto absensi yang usianya lebih dari ${cleanupMonths} bulan?\n\nTindakan ini tidak bisa dibatalkan! (Hanya menghapus file foto, riwayat jam absen tetap aman).`)) {
+      return;
+    }
+
+    setCleaningUp(true);
+    setCleanupMsg('Memproses pembersihan... jangan tutup halaman ini.');
+    try {
+      const deletedCount = await cleanupOldAttendancePhotos(cleanupMonths);
+      setCleanupMsg(`Selesai! Berhasil menghapus ${deletedCount} foto lama.`);
+    } catch (err) {
+      setCleanupMsg(err instanceof Error ? err.message : 'Gagal membersihkan penyimpanan.');
+    } finally {
+      setCleaningUp(false);
+    }
+  }
+
   return (
-    <SectionCard title="Pengaturan Absensi" description={SETTINGS_HELP_TEXT}>
+    <div className="grid gap-6">
+      <SectionCard title="Pengaturan Absensi" description={SETTINGS_HELP_TEXT}>
       <form className="grid gap-4" onSubmit={handleSubmit}>
         <div className="surface-subtle p-4 md:p-5">
           <div className="mb-4">
@@ -265,6 +287,42 @@ export default function SettingsPage() {
           </button>
         </div>
       </form>
-    </SectionCard>
+      </SectionCard>
+
+      <SectionCard title="Pembersihan Penyimpanan (Storage)" description="Hapus foto absensi lama untuk menghemat kapasitas penyimpanan. Riwayat jam absensi akan tetap tersimpan di database secara permanen.">
+        <div className="surface-subtle p-4 md:p-5 flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="flex-1">
+            <label className="mb-2 block text-sm font-semibold text-slate-600">Usia Foto</label>
+            <p className="mb-2 text-xs text-slate-400">Pilih foto usia berapa yang ingin dihapus.</p>
+            <select
+              className="custom-field"
+              value={cleanupMonths}
+              onChange={(e) => setCleanupMonths(Number(e.target.value))}
+              disabled={cleaningUp}
+            >
+              <option value={1}>Lebih dari 1 Bulan</option>
+              <option value={3}>Lebih dari 3 Bulan</option>
+              <option value={6}>Lebih dari 6 Bulan</option>
+              <option value={12}>Lebih dari 1 Tahun</option>
+            </select>
+          </div>
+          <div>
+            <button 
+              type="button" 
+              className="btn-danger w-full sm:w-auto mt-2 sm:mt-0"
+              onClick={handleCleanup}
+              disabled={cleaningUp}
+            >
+              {cleaningUp ? 'Membersihkan...' : 'Mulai Pembersihan'}
+            </button>
+          </div>
+        </div>
+        {cleanupMsg && (
+          <div className="mt-4 p-4 rounded-xl border border-sky-200 bg-sky-50 text-sky-800 text-sm font-medium">
+            {cleanupMsg}
+          </div>
+        )}
+      </SectionCard>
+    </div>
   );
 }

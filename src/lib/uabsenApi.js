@@ -667,6 +667,46 @@ export async function uploadAttendancePhoto(file, studentId, action) {
   return publicUrlData.publicUrl;
 }
 
+export async function cleanupOldAttendancePhotos(monthsOld) {
+  const dateLimit = new Date();
+  dateLimit.setMonth(dateLimit.getMonth() - monthsOld);
+
+  // 1. Ambil data URL yang akan dihapus
+  const { data, error: fetchError } = await supabase
+    .from('attendances')
+    .select('photo_url')
+    .lt('created_at', dateLimit.toISOString())
+    .not('photo_url', 'is', null);
+
+  if (fetchError) throw normalizeError(fetchError, 'Gagal mengambil daftar foto lama.');
+  if (!data || data.length === 0) return 0; // Tidak ada yang perlu dihapus
+
+  // 2. Ekstrak path dari URL publik
+  const paths = data
+    .map(item => item.photo_url.split('/public/attendance-photos/')[1])
+    .filter(Boolean);
+
+  // 3. Hapus dari Storage
+  if (paths.length > 0) {
+    // Supabase .remove() menerima array path
+    const { error: removeError } = await supabase.storage.from('attendance-photos').remove(paths);
+    if (removeError) throw normalizeError(removeError, 'Gagal menghapus file dari Storage.');
+  }
+
+  // 4. Update tabel di database agar photo_url menjadi null
+  const { error: updateError } = await supabase
+    .from('attendances')
+    .update({ photo_url: null })
+    .lt('created_at', dateLimit.toISOString())
+    .not('photo_url', 'is', null);
+
+  if (updateError) throw normalizeError(updateError, 'Gagal mengupdate referensi database.');
+
+  await logAudit('storage_cleanup', `Admin menghapus ${paths.length} foto absensi yang usianya lebih dari ${monthsOld} bulan.`);
+  
+  return paths.length;
+}
+
 export async function manualCorrectAttendance(payload) {
   return ensureSuccess(
     supabase.rpc('manual_correct_attendance', {

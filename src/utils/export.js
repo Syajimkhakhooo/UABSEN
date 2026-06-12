@@ -29,12 +29,27 @@ export function exportAttendanceCsv(records, filename = 'laporan-absensi.csv') {
   downloadBlob(filename, csv, 'text/csv;charset=utf-8;');
 }
 
-export function exportAttendancePdf(records, filename = 'laporan-absensi.pdf', options = {}) {
+export async function exportAttendancePdf(records, filename = 'laporan-absensi.pdf', options = {}) {
   const { title = 'REKAPITULASI ABSENSI SISWA', periodText = 'PERIODE BULAN ....' } = options;
   
   const doc = new jsPDF();
   
+  // Load Logo
+  const img = new Image();
+  img.src = '/logo.png';
+  await new Promise((resolve) => {
+    img.onload = resolve;
+    img.onerror = resolve; // Continue even if logo fails
+  });
+
   // Header
+  // If logo loaded successfully, draw it.
+  if (img.complete && img.naturalWidth > 0) {
+    // A4 width is 210mm. Center is 105. Logo on the left side of the title.
+    // Let's put it around x=20, y=10, width=22, height=22
+    doc.addImage(img, 'PNG', 20, 10, 22, 22);
+  }
+
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text(title, 105, 15, { align: 'center' });

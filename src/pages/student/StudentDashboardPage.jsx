@@ -6,8 +6,50 @@ import StatusBadge from '../../components/StatusBadge';
 import { useAuth } from '../../hooks/useAuth';
 import { toUserMessage } from '../../lib/errorMessages';
 import { getStudentDashboardData, logAudit, performAttendanceAction, uploadAttendancePhoto, getAttendanceSettings } from '../../lib/uabsenApi';
+import imageCompression from 'browser-image-compression';
 import { getCurrentPosition, calculateDistance } from '../../utils/attendance';
 import { formatDate, formatDateTime } from '../../utils/format';
+
+async function addWatermark(file, location, action) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const fontSize = Math.max(14, Math.floor(img.width / 30));
+      ctx.font = `${fontSize}px sans-serif`;
+      
+      const pad = fontSize;
+      const text1 = `UABSEN BMU - ${action === 'check_in' ? 'Masuk' : 'Keluar'}`;
+      const text2 = formatDateTime(new Date());
+      const text3 = `Lat: ${location.latitude.toFixed(6)} Long: ${location.longitude.toFixed(6)}`;
+
+      const rectHeight = (fontSize * 3) + (pad * 2);
+      
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(0, canvas.height - rectHeight, canvas.width, rectHeight);
+
+      ctx.fillStyle = 'white';
+      ctx.fillText(text1, pad, canvas.height - rectHeight + pad + (fontSize * 0.8));
+      ctx.fillText(text2, pad, canvas.height - rectHeight + pad + (fontSize * 2.0));
+      ctx.fillText(text3, pad, canvas.height - rectHeight + pad + (fontSize * 3.2));
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+           resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+        } else {
+           resolve(file); 
+        }
+      }, 'image/jpeg', 0.95);
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
 
 export default function StudentDashboardPage() {
   const { profile } = useAuth();
@@ -114,10 +156,19 @@ export default function StudentDashboardPage() {
        return;
     }
 
-    setMessage('Mengunggah foto dan memproses absensi...');
+    setMessage('Mengompres foto dan memproses absensi...');
 
     try {
-       const photoUrl = await uploadAttendancePhoto(file, profile.student_id, pendingAction);
+       const options = {
+         maxSizeMB: 0.2, // Maksimal 200KB
+         maxWidthOrHeight: 800, // Dimensi maksimal 800px
+         useWebWorker: true,
+         fileType: 'image/jpeg',
+       };
+       const compressedFile = await imageCompression(file, options);
+       const watermarkedFile = await addWatermark(compressedFile, pendingLocation, pendingAction);
+
+       const photoUrl = await uploadAttendancePhoto(watermarkedFile, profile.student_id, pendingAction);
        
        await performAttendanceAction(
          pendingAction,

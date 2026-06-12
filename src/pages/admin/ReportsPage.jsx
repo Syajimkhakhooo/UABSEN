@@ -61,7 +61,7 @@ export default function ReportsPage() {
       if (filters.classId) {
         const cls = classes.find((c) => c.id === filters.classId);
         if (cls) {
-          title = `REKAPITULASI ABSENSI SISWA - KELAS ${cls.name.toUpperCase()}`;
+          title = `REKAPITULASI ABSENSI SISWA - ${cls.name.toUpperCase()}`;
         }
       }
       
@@ -72,7 +72,7 @@ export default function ReportsPage() {
         }
       }
 
-      exportAttendancePdf(records, 'app-report.pdf', { title, periodText });
+      await exportAttendancePdf(records, 'app-report.pdf', { title, periodText });
     }
 
     await logAudit('report_export', 'Admin mengekspor laporan absensi.', {
