@@ -13,6 +13,7 @@ import {
 
 export const ROLE = {
   ADMIN: 'admin',
+  SENSEI: 'sensei',
   STUDENT: 'student',
 };
 
@@ -40,7 +41,15 @@ export const ADMIN_NAV_ITEMS = [
   { to: '/admin/notifications', label: 'Notifikasi', icon: Bell },
   { to: '/admin/audit-logs', label: 'Audit Log', icon: ShieldCheck },
   { to: '/admin/reports', label: 'Laporan', icon: History },
+  { to: '/admin/staff', label: 'Manajemen Staf', icon: ShieldCheck },
   { to: '/admin/settings', label: 'Pengaturan', icon: Settings },
+];
+
+export const SENSEI_NAV_ITEMS = [
+  { to: '/admin/students', label: 'Data Siswa', icon: Users },
+  { to: '/admin/attendance', label: 'Data Absensi', icon: ClipboardList },
+  { to: '/admin/leave-requests', label: 'Izin & Sakit', icon: FileText },
+  { to: '/admin/notifications', label: 'Notifikasi', icon: Bell },
 ];
 
 export const STUDENT_NAV_ITEMS = [

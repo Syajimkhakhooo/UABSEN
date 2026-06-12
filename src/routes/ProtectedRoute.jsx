@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
 import { useAuth } from '../hooks/useAuth';
 
-export default function ProtectedRoute({ children, role }) {
+export default function ProtectedRoute({ children, allowedRoles }) {
   const { loading, profile } = useAuth();
 
   if (loading) {
@@ -17,8 +17,8 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to="/pending-access" replace />;
   }
 
-  if (role && profile.role !== role) {
-    return <Navigate to={profile.role === 'admin' ? '/admin' : '/student'} replace />;
+  if (allowedRoles && !allowedRoles.includes(profile.role)) {
+    return <Navigate to={profile.role === 'admin' || profile.role === 'sensei' ? '/admin' : '/student'} replace />;
   }
 
   if (!profile.active) {

@@ -9,6 +9,7 @@ import { ATTENDANCE_TYPES } from '../../lib/constants';
 import { listAttendance, listStudents, logAudit, manualCorrectAttendance, listClasses } from '../../lib/uabsenApi';
 import { exportAttendanceCsv, exportAttendancePdf } from '../../utils/export';
 import { formatDate, formatDateTime } from '../../utils/format';
+import { Image as ImageIcon } from 'lucide-react';
 
 const correctionInitialState = {
   attendance_id: '',
@@ -31,6 +32,8 @@ export default function AttendanceDataPage() {
   });
   const [correction, setCorrection] = useState(correctionInitialState);
   const [modalOpen, setModalOpen] = useState(false);
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [selectedPhotos, setSelectedPhotos] = useState({ checkIn: null, checkOut: null, studentName: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const studentOptions = useMemo(
@@ -214,22 +217,41 @@ export default function AttendanceDataPage() {
                   <td data-label="Absen Masuk">{formatDateTime(record.check_in_at)}</td>
                   <td data-label="Absen Keluar">{formatDateTime(record.check_out_at)}</td>
                   <td data-label="Aksi">
-                    <button
-                      type="button"
-                      className="btn-secondary !px-3 !py-2"
-                      onClick={() => {
-                        setCorrection({
-                          attendance_id: record.id,
-                          attendance_status: record.attendance_status,
-                          check_in_at: record.check_in_at ? record.check_in_at.slice(0, 16) : '',
-                          check_out_at: record.check_out_at ? record.check_out_at.slice(0, 16) : '',
-                          correction_note: record.correction_note ?? '',
-                        });
-                        setModalOpen(true);
-                      }}
-                    >
-                      Koreksi
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn-secondary !px-3 !py-2 flex-1"
+                        onClick={() => {
+                          setCorrection({
+                            attendance_id: record.id,
+                            attendance_status: record.attendance_status,
+                            check_in_at: record.check_in_at ? record.check_in_at.slice(0, 16) : '',
+                            check_out_at: record.check_out_at ? record.check_out_at.slice(0, 16) : '',
+                            correction_note: record.correction_note ?? '',
+                          });
+                          setModalOpen(true);
+                        }}
+                      >
+                        Koreksi
+                      </button>
+                      {(record.check_in_photo_url || record.check_out_photo_url) && (
+                        <button
+                          type="button"
+                          className="btn-secondary !px-3 !py-2 text-sky-600"
+                          title="Lihat Foto"
+                          onClick={() => {
+                            setSelectedPhotos({
+                              checkIn: record.check_in_photo_url,
+                              checkOut: record.check_out_photo_url,
+                              studentName: record.students?.name || 'Siswa',
+                            });
+                            setPhotoModalOpen(true);
+                          }}
+                        >
+                          <ImageIcon size={16} />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -280,6 +302,45 @@ export default function AttendanceDataPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        open={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        title={`Foto Absensi - ${selectedPhotos.studentName}`}
+        description="Bukti foto absen masuk dan absen keluar."
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-slate-700">Absen Masuk</h4>
+            {selectedPhotos.checkIn ? (
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                <img src={selectedPhotos.checkIn} alt="Absen Masuk" className="h-auto w-full object-cover" />
+              </div>
+            ) : (
+              <div className="flex h-32 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500">
+                Tidak ada foto
+              </div>
+            )}
+          </div>
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-slate-700">Absen Keluar</h4>
+            {selectedPhotos.checkOut ? (
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                <img src={selectedPhotos.checkOut} alt="Absen Keluar" className="h-auto w-full object-cover" />
+              </div>
+            ) : (
+              <div className="flex h-32 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500">
+                Tidak ada foto
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button type="button" className="btn-primary" onClick={() => setPhotoModalOpen(false)}>
+            Tutup
+          </button>
+        </div>
       </Modal>
     </div>
   );

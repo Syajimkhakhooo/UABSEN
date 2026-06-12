@@ -342,7 +342,7 @@ export default function StudentManagementPage() {
                   <th>Siswa</th>
                   <th>Kelas & Program</th>
                   <th>Status</th>
-                  <th>Login</th>
+                  <th>Login (Email)</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -368,9 +368,16 @@ export default function StudentManagementPage() {
                           {student.active ? 'Aktif' : 'Nonaktif'}
                         </span>
                       </td>
-                      <td data-label="Login">
+                      <td data-label="Login (Email)">
                         {hasProfile ? (
-                          <StatusBadge status="approved" type="request" />
+                          <div className="flex flex-col gap-1 items-start">
+                            <StatusBadge status="approved" type="request" />
+                            {student.email && (
+                              <span className="text-xs text-slate-500 max-w-[150px] truncate" title={student.email}>
+                                {student.email}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="badge bg-amber-100 text-amber-700">Belum dibuat</span>
                         )}

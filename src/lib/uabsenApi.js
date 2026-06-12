@@ -310,12 +310,23 @@ export async function listStudents(search = '') {
 
   const profileMap = new Map(profileRows.map((profile) => [profile.student_id, profile]));
 
+  let emailMap = new Map();
+  try {
+    const emailsResponse = await supabase.rpc('admin_get_student_emails');
+    if (!emailsResponse.error && emailsResponse.data) {
+      emailMap = new Map(emailsResponse.data.map(item => [item.student_id, item.email]));
+    }
+  } catch (err) {
+    console.warn('Gagal memuat email siswa (mungkin fungsi belum ada)', err);
+  }
+
   return students.map((student) => {
     const linkedProfile = profileMap.get(student.id);
     return {
       ...student,
       auth_user_id: linkedProfile?.auth_user_id ?? null,
       profile_id: linkedProfile?.id ?? null,
+      email: emailMap.get(student.id) ?? null,
     };
   });
 }
@@ -497,32 +508,74 @@ export async function changeOwnPassword(nextPassword) {
 }
 
 export async function resetStudentPassword(payload) {
-  try {
-    const { data, error } = await withTimeout(
-      supabase.functions.invoke('reset-student-password', {
-        body: {
-          student_id: payload.student_id,
-          password: payload.password,
-        },
-      }),
-      EDGE_FUNCTION_TIMEOUT_MS,
-      '[Timeout] Reset password siswa tertahan.',
-    );
+  return ensureSuccess(
+    supabase.rpc('admin_reset_student_password', {
+      target_student_id: payload.student_id,
+      new_password: payload.password,
+    }),
+    'Gagal mereset password siswa. Pastikan admin_reset_student_password RPC sudah ditambahkan di database.'
+  );
+}
 
-    if (error) {
-      throw await normalizeEdgeFunctionError(error, 'Gagal mereset password siswa.');
-    }
+export async function listStaffAccounts() {
+  const { data, error } = await supabase.rpc('admin_get_staff_profiles');
+  if (error) throw normalizeError(error, 'Gagal memuat data staf.');
+  return data ?? [];
+}
 
-    return data;
-  } catch (error) {
-    if (isMissingEdgeFunctionError(error)) {
-      throw new Error(
-        'Edge Function `reset-student-password` belum dideploy di Supabase. Deploy function itu dulu, lalu coba lagi.',
-      );
-    }
+export async function createStaffAccount(payload) {
+  const normalizedPayload = {
+    ...payload,
+    email: payload.email.trim().toLowerCase(),
+  };
 
-    throw error;
+  const authClient = createTransientAuthClient();
+  const {
+    data: signUpData,
+    error: signUpError,
+  } = await withTimeout(
+    authClient.auth.signUp({
+      email: normalizedPayload.email,
+      password: normalizedPayload.password,
+    }),
+    CREATE_ACCOUNT_TIMEOUT_MS,
+    '[Timeout] Pembuatan akun staf tertahan.',
+  );
+
+  if (signUpError) {
+    throw normalizeError(signUpError, 'Gagal membuat akun login staf.');
   }
+
+  if (!signUpData?.user || signUpData.user.identities?.length === 0) {
+    throw new Error('Gagal membuat akun login staf. Email mungkin sudah terdaftar.');
+  }
+
+  const newUserId = signUpData.user.id;
+
+  await withTimeout(
+    ensureSuccess(
+      supabase.from('profiles').upsert(
+        {
+          auth_user_id: newUserId,
+          role: payload.role || 'sensei',
+          active: true,
+        },
+        { onConflict: 'auth_user_id' }
+      ),
+      'Gagal menyetel role staf.'
+    ),
+    AUTH_TIMEOUT_MS,
+    '[Timeout] Proses penautan profil tertahan di database.'
+  );
+
+  return { message: 'Akun staf berhasil dibuat.', auth_user_id: newUserId };
+}
+
+export async function deleteStaffAccount(authUserId) {
+  return ensureSuccess(
+    supabase.rpc('admin_delete_user', { target_user_id: authUserId }),
+    'Gagal menghapus akun staf.'
+  );
 }
 
 export async function deleteStudent(studentId) {
@@ -562,8 +615,8 @@ export async function listAttendance(filters = {}) {
   await ensureDailyAbsencesIfPossible();
 
   const selectQuery = filters.classId
-    ? 'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, correction_note, students!inner(name, student_number, class_id)'
-    : 'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, correction_note, students(name, student_number, class_id)';
+    ? 'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, check_in_photo_url, check_out_photo_url, correction_note, students!inner(name, student_number, class_id)'
+    : 'id, student_id, attendance_date, attendance_status, check_in_at, check_out_at, check_in_photo_url, check_out_photo_url, correction_note, students(name, student_number, class_id)';
 
   let query = supabase
     .from('attendances')

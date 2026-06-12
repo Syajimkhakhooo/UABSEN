@@ -2,7 +2,7 @@ import { Menu, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { ADMIN_NAV_ITEMS, ROLE, STUDENT_NAV_ITEMS } from '../lib/constants';
+import { ADMIN_NAV_ITEMS, ROLE, STUDENT_NAV_ITEMS, SENSEI_NAV_ITEMS } from '../lib/constants';
 import Navbar from './Navbar';
 
 function Navigation({ items, mobile = false, collapsed = false, onNavigate }) {
@@ -49,7 +49,11 @@ export default function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navItems = useMemo(
-    () => (profile?.role === ROLE.ADMIN ? ADMIN_NAV_ITEMS : STUDENT_NAV_ITEMS),
+    () => {
+      if (profile?.role === ROLE.ADMIN) return ADMIN_NAV_ITEMS;
+      if (profile?.role === ROLE.SENSEI) return SENSEI_NAV_ITEMS;
+      return STUDENT_NAV_ITEMS;
+    },
     [profile?.role],
   );
 
@@ -209,7 +213,7 @@ export default function AppShell() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold tracking-wide text-slate-800">UABSEN</p>
                   <p className="text-xs text-slate-500">
-                    {profile?.role === 'admin' ? 'Panel admin mobile' : 'Portal siswa mobile'}
+                    {profile?.role === 'admin' ? 'Panel admin mobile' : profile?.role === 'sensei' ? 'Panel sensei mobile' : 'Portal siswa mobile'}
                   </p>
                 </div>
               </div>
