@@ -45,9 +45,25 @@ export async function exportAttendancePdf(records, filename = 'laporan-absensi.p
   // Header
   // If logo loaded successfully, draw it.
   if (img.complete && img.naturalWidth > 0) {
+    // Create a canvas to draw the image with a white background
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    
+    // Fill white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw the original image over the white background
+    ctx.drawImage(img, 0, 0);
+    
+    // Convert to JPEG data URL
+    const imgDataUrl = canvas.toDataURL('image/jpeg');
+
     // A4 width is 210mm. Center is 105. Logo on the left side of the title.
     // Let's put it around x=20, y=10, width=22, height=22
-    doc.addImage(img, 'PNG', 20, 10, 22, 22);
+    doc.addImage(imgDataUrl, 'JPEG', 20, 10, 22, 22);
   }
 
   doc.setFontSize(14);
