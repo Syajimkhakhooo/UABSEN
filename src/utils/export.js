@@ -13,16 +13,52 @@ function downloadBlob(filename, content, type) {
   URL.revokeObjectURL(url);
 }
 
+function getRecapData(records) {
+  const recapMap = new Map();
+  records.forEach((record) => {
+    const studentId = record.students?.id || record.student_id;
+    if (!studentId) return;
+
+    if (!recapMap.has(studentId)) {
+      recapMap.set(studentId, {
+        name: record.students?.name || '-',
+        student_number: record.students?.student_number || '-',
+        present: 0,
+        late: 0,
+        leave: 0,
+        sick: 0,
+        absent: 0,
+      });
+    }
+
+    const stat = recapMap.get(studentId);
+    if (record.attendance_status === 'present' || record.attendance_status === 'corrected') {
+      stat.present += 1;
+    } else if (record.attendance_status === 'late') {
+      stat.late += 1;
+    } else if (record.attendance_status === 'leave') {
+      stat.leave += 1;
+    } else if (record.attendance_status === 'sick') {
+      stat.sick += 1;
+    } else if (record.attendance_status === 'absent') {
+      stat.absent += 1;
+    }
+  });
+
+  return Array.from(recapMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function exportAttendanceCsv(records, filename = 'laporan-absensi.csv') {
+  const recapData = getRecapData(records);
   const csv = Papa.unparse(
-    records.map((record) => ({
-      tanggal: formatDate(record.attendance_date),
-      siswa: record.students?.name ?? '-',
-      nomor_induk: record.students?.student_number ?? '-',
-      status: getAttendanceStatusLabel(record.attendance_status),
-      check_in: formatDateTime(record.check_in_at),
-      check_out: formatDateTime(record.check_out_at),
-      catatan: record.correction_note ?? '',
+    recapData.map((data) => ({
+      'Nama Siswa': data.name,
+      'No. Induk': data.student_number,
+      'Hadir': data.present,
+      'Terlambat': data.late,
+      'Izin': data.leave,
+      'Sakit': data.sick,
+      'Alpa': data.absent,
     })),
   );
 
@@ -31,6 +67,7 @@ export function exportAttendanceCsv(records, filename = 'laporan-absensi.csv') {
 
 export async function exportAttendancePdf(records, filename = 'laporan-absensi.pdf', options = {}) {
   const { title = 'REKAPITULASI ABSENSI SISWA', periodText = 'PERIODE BULAN ....' } = options;
+  const recapData = getRecapData(records);
   
   const doc = new jsPDF();
   
@@ -62,7 +99,6 @@ export async function exportAttendancePdf(records, filename = 'laporan-absensi.p
     const imgDataUrl = canvas.toDataURL('image/jpeg');
 
     // A4 width is 210mm. Center is 105. Logo on the left side of the title.
-    // Let's put it around x=20, y=10, width=22, height=22
     doc.addImage(imgDataUrl, 'JPEG', 20, 10, 22, 22);
   }
 
@@ -77,20 +113,30 @@ export async function exportAttendancePdf(records, filename = 'laporan-absensi.p
 
   autoTable(doc, {
     startY: 35,
-    head: [['Tanggal', 'Siswa', 'No. Induk', 'Status', 'Absen Masuk', 'Absen Keluar']],
-    body: records.map((record) => [
-      formatDate(record.attendance_date),
-      record.students?.name ?? '-',
-      record.students?.student_number ?? '-',
-      getAttendanceStatusLabel(record.attendance_status),
-      formatDateTime(record.check_in_at),
-      formatDateTime(record.check_out_at),
+    head: [['Nama Siswa', 'No. Induk', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpa']],
+    body: recapData.map((data) => [
+      data.name,
+      data.student_number,
+      data.present.toString(),
+      data.late.toString(),
+      data.leave.toString(),
+      data.sick.toString(),
+      data.absent.toString(),
     ]),
-    styles: { fontSize: 9, cellPadding: 2.5 },
-    headStyles: { fillColor: [11, 135, 237] },
+    styles: { fontSize: 10, cellPadding: 3 },
+    headStyles: { fillColor: [11, 135, 237], halign: 'center' },
+    columnStyles: {
+      0: { halign: 'left' },
+      1: { halign: 'center' },
+      2: { halign: 'center' },
+      3: { halign: 'center' },
+      4: { halign: 'center' },
+      5: { halign: 'center' },
+      6: { halign: 'center' },
+    },
     didDrawPage: function (data) {
       // Footer
-      const str = 'Dicetak Otomatis melalu laman UABSEN BMU';
+      const str = 'Dicetak Otomatis melalui laman UABSEN BMU';
       doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       const pageSize = doc.internal.pageSize;
